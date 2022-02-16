@@ -3,5 +3,6 @@ module.exports = {
     password:'12345678',
     database:'chat_application',
     host:'localhost',
-    dialect:'mysql'
+    dialect:'mysql',
+    JWTKEY:'kjcnjakcscjhjh'
 }
