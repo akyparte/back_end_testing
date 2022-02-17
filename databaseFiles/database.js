@@ -28,6 +28,10 @@ let Users = sequelize.define('Users',{
     password:{
         type:DataTypes.STRING,
         allowNull:false,
+    },
+    uniqueID:{
+        type:DataTypes.STRING,
+        allowNull:false
     }
 },{
     indexes:[

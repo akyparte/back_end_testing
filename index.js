@@ -1,4 +1,6 @@
 const express = require('express');
+const cls_db_functions = require('./db_functions');
+const objDbFunctions = new cls_db_functions();
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
 const app = express();
@@ -17,22 +19,27 @@ app.get('/home',(req,res) => {
     // now i 'll get jwt from cookie take username from it
     // make request to database get his info 
     // and create his page dynamically
+    res.json({home:'hhhoommmmee'});
 })
 
-app.post('/signin',(req,res) => {
+app.post('/signin',async (req,res) => {
     let username = req.body.username;
     let password = req.body.password;
     if(username&&password){
+        let result = await objDbFunctions.isRegisteredUser(username,password);
+        if(result.validUser){
+          let payload = {
+            username:username,
+            date:Date.now(),
+            id:result.user.uniqueID
+          }
+          let token = jwt.sign(payload,config.JWTKEY);
+          res.cookie('jwt',token);
+          res.json({ response:'authenticated' });
+        }
           // need to make request to database and validate user
            // now redirect user to chat site
-        let payload = {
-          username:username,
-          date:Date.now()
-        }
-        let token = jwt.sign(payload,config.JWTKEY);
-        res.cookie('jwt',token);
-
-           res.redirect('/home');
+  
     }else {
       res.sendStatus(400);
     }
