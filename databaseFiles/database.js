@@ -1,4 +1,4 @@
-const config = require('./config');
+const config = require('../config');
 const { Sequelize , DataTypes } = require('sequelize');
 const sequelize = new Sequelize(config.database,config.username,config.password,{
     host:config.host,
@@ -24,6 +24,7 @@ let Users = sequelize.define('Users',{
     email:{
         type:DataTypes.STRING(30),
         allowNull:false,
+        unique:true
     },
     password:{
         type:DataTypes.STRING,

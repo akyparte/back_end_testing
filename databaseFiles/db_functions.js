@@ -2,7 +2,6 @@ const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
 const {Users} = require('./database');
 const bcrypt = require('bcrypt');
-const { use } = require('express/lib/application');
 
 class Queries {
   

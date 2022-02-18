@@ -1,5 +1,7 @@
 const express = require('express');
-const cls_db_functions = require('./db_functions');
+const clsTokenValidation = require('./middlewareFiles/validateToken');
+const objTokenValidation = new clsTokenValidation();
+const cls_db_functions = require('./databaseFiles/db_functions');
 const objDbFunctions = new cls_db_functions();
 const cookieParser = require('cookie-parser');
 const jwt = require('jsonwebtoken');
@@ -10,21 +12,24 @@ const { Server } = require("socket.io");
 const { config } = require('process');
 const io = new Server(server);
 app.use(cookieParser());
-app.get('/', (req, res) => {
-  res.sendFile(__dirname + '/page.html');
+app.use(express.json())
+app.use(express.static(__dirname+'/public'));
+app.get('/', objTokenValidation.varifyToken,(req, res) => {
+  res.sendFile(__dirname + '/staticPages/sign_up_in_page.html');
 
 });
 
-app.get('/home',(req,res) => {
+app.get('/chat',objTokenValidation.isTokenExisted,(req,res) => {
     // now i 'll get jwt from cookie take username from it
     // make request to database get his info 
     // and create his page dynamically
-    res.json({home:'hhhoommmmee'});
+    res.json({chat:'hhhoommmmee'});
 })
 
-app.post('/signin',async (req,res) => {
+app.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
     let username = req.body.username;
     let password = req.body.password;
+    console.log(username,password);
     if(username&&password){
         let result = await objDbFunctions.isRegisteredUser(username,password);
         if(result.validUser){
@@ -48,16 +53,22 @@ app.post('/signin',async (req,res) => {
 app.get('/signout',(req,res) => {
     // now delete token cookie from browser 
     // and redirect that person to login page
-    res.clearCookie();
+    res.clearCookie('jwt');
 })
 
-app.post('/signup',(req,res) => {
+app.post('/signup',objTokenValidation.varifyToken,async(req,res) => {
     let username = req.body.username;
     let password = req.body.password;
     let email = req.body.email;
     // now i need a database function which can tell me if this user exists or not
     // if exists return already_available
     // otherwise created
+    let result = await objDbFunctions.addUser(username,password,email);
+    if(result.isCreated){
+      res.json({response:'created'});
+    }else {
+      res.send({response:'alreadyAvailable'})
+    }
 
 })
 

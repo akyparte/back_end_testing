@@ -27,7 +27,7 @@ login_btn.addEventListener("click", async () => {
                 email: em,
                 password: pass,
             };
-            let validUserName = await fetch("/validUser", {
+            let validUserName = await fetch("/signup", {
                 method: "post",
                 headers: {
                     "Content-Type": "application/json",
@@ -35,14 +35,16 @@ login_btn.addEventListener("click", async () => {
                 body: JSON.stringify(userObj),
             });
             validUserName = await validUserName.json();
-            if (validUserName.response === "valid") {
-                if (validUserName.isAccountCreated === true) {
+            if (validUserName.response === "created") {
+                   username.value = '';
+                   email.value = '';
+                   password.value = '';
                     // now toggle and take him to sign in page
                     // becasue user account has been created
-                } else {
-                    alert("server error accured");
-                    return;
-                }
+                    toggle();
+             
+            }else if(validUserName.response === 'alreadyAvailable'){
+                username.value = 'Already taken';
             }
         }
     } else {

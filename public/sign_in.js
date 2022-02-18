@@ -13,7 +13,7 @@ login_btn.addEventListener('click',async () => {
 			password: password.value.trim()
 		}
 		
-		let result = await fetch('/sign_in',{
+		let result = await fetch('/signin',{
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json'
