@@ -1,3 +1,4 @@
+import{toggle} from  '/code.js';
 let username = document.getElementById("sign-up-username");
 let email = document.getElementById("sign-up-email");
 let password = document.getElementById("sign-up-password");
@@ -21,7 +22,11 @@ login_btn.addEventListener("click", async () => {
             confirm_password.placeholder = "password not matched";
             confirm_password.style.border = "1px solid red";
             return;
-        } else {
+        } else if(!em.endsWith('gmail.com')){
+               email.value = 'Invalid Email';
+               email.style.border = '1px solid red';
+               return;
+        }else {
             let userObj = {
                 username: user,
                 email: em,
@@ -36,18 +41,19 @@ login_btn.addEventListener("click", async () => {
             });
             validUserName = await validUserName.json();
             if (validUserName.response === "created") {
-                   username.value = '';
-                   email.value = '';
-                   password.value = '';
                     // now toggle and take him to sign in page
                     // becasue user account has been created
                     toggle();
              
             }else if(validUserName.response === 'alreadyAvailable'){
-                username.value = 'Already taken';
+                username.value = 'Username already taken';
+                password.value = '';
+                email.value = '';
+                confirm_password.value = '';
             }
         }
     } else {
+        if(username.value.trim() === 'Username already taken') username.value = '';
         for (let i = 0; i < sign_up_form.children.length - 2; i++) {
             if (sign_up_form.children[i].children[1].value.length === 0) {
                 sign_up_form.children[i].children[1].style.border = "1px solid red";

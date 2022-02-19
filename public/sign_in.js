@@ -26,12 +26,13 @@ login_btn.addEventListener('click',async () => {
 		   // now user is authenticated 
 		   // redirect him to chatting home page
 		   // useing location.href property
-		    location.href = '/home';
-		}else {
+		    location.href = '/chat';
+		}else if(result.response === 'unauthenticated'){
 		   username.value = 'Invalid username';
-		   password.value = 'Invalid password';
+		   password.value = '';
+		   password.placeholder = 'Invalid password';
 		   username.style.border = '1px solid red';
-		   password.style.border = '1px sold red';
+		   password.style.border = '1px solid red';
 		}
 	
 	}else {

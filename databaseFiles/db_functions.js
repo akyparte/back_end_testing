@@ -6,30 +6,43 @@ const bcrypt = require('bcrypt');
 class Queries {
   
   async addUser(username,password,email) {
-      let salt = await bcrypt.genSalt(10);
-     let hashedPassword = await bcrypt.hash(password, salt);
-     let ID = generateID({ length: 32});
-       let [result,isCreated] = await Users.findOrCreate({
-           where:{
-               username:username,
-               email:email,
-               password:hashedPassword,
-               uniqueID:ID
-           }
-       });
-       return { data:result.dataValues, isCreated:isCreated }       
+      let user = await Users.findOne({
+          where:{
+              username:username,
+          }
+      });
+      if(user){
+        return { isCreated:false }       
+      }else {
+        let salt = await bcrypt.genSalt(10);
+        let hashedPassword = await bcrypt.hash(password, salt);
+        let ID = generateID({ length: 32});
+          let result = await Users.create({
+              username:username,
+              password:hashedPassword,
+              email:email,
+              uniqueID:ID
+          })
+        
+           return { data:result.dataValues, isCreated:true }       
+      }
    }
 
    async isRegisteredUser(username,password){
        let user = await Users.findOne({
             where:{username:username}
         });
-       let valid = await bcrypt.compare(password,user.password);
-    //    console.log(s
-       return {
-           validUser:valid,
-           user:user
-       };
+        if(user){
+
+            let valid = await bcrypt.compare(password,user.password);
+            return {
+                validUser:valid,
+                user:user
+            };
+        }else {
+            return { validUser:false  }
+        }
+  
    }
 }
 
