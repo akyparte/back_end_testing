@@ -1,5 +1,6 @@
 const express = require('express');
 const login_system_route = require('./Routers/login_system_routes');
+const forgot_route = require('./Routers/forgot_password_routes');
 const clsTokenValidation = require('./middlewareFiles/validateToken');
 const objTokenValidation = new clsTokenValidation();
 const cookieParser = require('cookie-parser');
@@ -7,11 +8,13 @@ const app = express();
 const http = require('http');
 const server = http.createServer(app);
 const { Server } = require("socket.io");
+const res = require('express/lib/response');
 const io = new Server(server);
 
 
 app.use(cookieParser());
 app.use(express.json())
+app.use(express.urlencoded())
 app.use(express.static(__dirname+'/public'));
 
 
@@ -21,6 +24,8 @@ app.get('/', objTokenValidation.varifyToken,(req, res) => {
 });
 
 app.use('/',login_system_route);
+
+app.use('/forgot_password',forgot_route);
 
 app.get('/chat',objTokenValidation.isTokenExisted,(req,res) => {
     // now i 'll get jwt from cookie take username from it
@@ -40,6 +45,8 @@ io.on('connection', (socket) => {
 server.listen(4000,() => {
   console.log('listening on *:4000');
 });
+
+
 
 function isValidUser(req,res,next) {
      

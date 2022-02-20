@@ -4,5 +4,9 @@ module.exports = {
     database:'chat_application',
     host:'localhost',
     dialect:'mysql',
-    JWTKEY:'kjcnjakcscjhjh'
+    JWTKEY:'kjcnjakcscjhjh',
+    OTP_message:`here is your opt [OTP] dont share with anyone`,
+    em_subject:'OTP from myChat',
+    email:'testingemail540@gmail.com',
+    em_password:'gatar@pay@gela'
 }

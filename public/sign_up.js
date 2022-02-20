@@ -7,7 +7,8 @@ let login_btn = document.getElementById("sign-up-btn");
 let sign_up_form = document.querySelector(".form.sign-up");
 
 console.log(password.placeholder);
-login_btn.addEventListener("click", async () => {
+login_btn.addEventListener("click", async (e) => {
+    e.preventDefault();
     let user = username.value.trim();
     let em = email.value.trim();
     let pass = password.value.trim();
@@ -46,10 +47,14 @@ login_btn.addEventListener("click", async () => {
                     toggle();
              
             }else if(validUserName.response === 'alreadyAvailable'){
-                username.value = 'Username already taken';
-                password.value = '';
-                email.value = '';
-                confirm_password.value = '';
+                // username.value = 'Username already taken';
+                // password.value = '';
+                password.placeholder = 'password'
+                // email.value = '';
+                // confirm_password.value = '';
+                confirm_password.placeholder = 'confirm password'
+                username.setCustomValidity("Username already taken");
+                username.reportValidity();
             }
         }
     } else {

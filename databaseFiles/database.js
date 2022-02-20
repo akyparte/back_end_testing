@@ -45,8 +45,26 @@ let Users = sequelize.define('Users',{
 
 });
 
+let TempEmailStore = sequelize.define('emailStore',{
+    email:{
+        type:DataTypes.STRING,
+        allowNull:false
+    },
+    OTP:{
+        type:DataTypes.STRING,
+        allowNull:false
+    }
+},{
+    indexes:[
+        {
+            unique:true,
+            fields:['email']
+        }
+    ],
+    timestamps:false
+});
 
-(async function (params) {
+(async function () {
     try{
        await sequelize.sync();
        console.log('table created');
@@ -56,5 +74,6 @@ let Users = sequelize.define('Users',{
 })();
 
 module.exports.Users = Users;
+module.exports.TempEmailStore = TempEmailStore;
 
 

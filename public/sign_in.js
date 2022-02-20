@@ -28,11 +28,15 @@ login_btn.addEventListener('click',async () => {
 		   // useing location.href property
 		    location.href = '/chat';
 		}else if(result.response === 'unauthenticated'){
-		   username.value = 'Invalid username';
-		   password.value = '';
-		   password.placeholder = 'Invalid password';
+		//    username.value = 'Invalid username';
+		//    password.value = '';
+		//    password.placeholder = 'Invalid password';
 		   username.style.border = '1px solid red';
 		   password.style.border = '1px solid red';
+		   username.setCustomValidity("Invalid credentials");
+		//    password.setCustomValidity("Invalid password");
+		   username.reportValidity();
+		//    password.reportValidity();
 		}
 	
 	}else {
@@ -46,6 +50,6 @@ login_btn.addEventListener('click',async () => {
 });
 
 forgot_password.addEventListener('click',() => {
-	// now take him to reset password page
+	location.href = '/forgot_password'
 });
 
