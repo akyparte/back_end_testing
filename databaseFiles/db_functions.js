@@ -1,7 +1,8 @@
 const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
-const {Users,TempEmailStore} = require('./database');
+const {Users,TempEmailStore,Friends} = require('./database');
 const bcrypt = require('bcrypt');
+const { use } = require('../Routers/login_system_routes');
 
 class Queries {
   
@@ -129,6 +130,16 @@ class Queries {
            
         }
 
+    }
+
+    async getUserFriends(username){
+          let result = await Friends.findAll({
+              where:{
+                  username:username
+              }
+          });
+
+          return result;
     }
 }
 

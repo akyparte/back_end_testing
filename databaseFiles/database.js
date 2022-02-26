@@ -45,6 +45,26 @@ let Users = sequelize.define('Users',{
 
 });
 
+let Friends = sequelize.define('Friends',{
+    username:{
+        type:DataTypes.STRING(25),
+        allowNull:false,
+    },
+    friend:{
+        type:DataTypes.STRING(25)
+    }
+
+},{
+    indexes:[
+        {
+            unique: true,
+            fields: ['username']
+          }
+    ],
+    timestamps:false
+
+});
+
 let TempEmailStore = sequelize.define('emailStore',{
     email:{
         type:DataTypes.STRING,
@@ -68,12 +88,13 @@ let TempEmailStore = sequelize.define('emailStore',{
     try{
        await sequelize.sync();
        console.log('table created');
-    }catch{
+    }catch(err){
+        console.log(err);
         console.log('error occured');
     }
 })();
 
 module.exports.Users = Users;
 module.exports.TempEmailStore = TempEmailStore;
-
+module.exports.Friends = Friends;
 
