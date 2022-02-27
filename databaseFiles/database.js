@@ -12,7 +12,7 @@ const sequelize = new Sequelize(config.database,config.username,config.password,
     }catch{
        console.log('error occured');
     }
-})()
+})();
 
 
 
@@ -52,17 +52,13 @@ let Friends = sequelize.define('Friends',{
     },
     friend:{
         type:DataTypes.STRING(25)
+    },
+    profileUrl:{
+        type:DataTypes.STRING
     }
 
 },{
-    indexes:[
-        {
-            unique: true,
-            fields: ['username']
-          }
-    ],
     timestamps:false
-
 });
 
 let TempEmailStore = sequelize.define('emailStore',{
@@ -84,6 +80,38 @@ let TempEmailStore = sequelize.define('emailStore',{
     timestamps:false
 });
 
+
+let UserTimeStamp = sequelize.define('userTime',{
+    username:{
+        type:DataTypes.STRING(25),
+        allowNull:false
+    },
+    status:{
+        type:DataTypes.STRING,
+        allowNull:false
+    }
+},
+{
+    timestamps:false
+});
+
+
+let Chats = sequelize.define('chats',{
+    username:{
+        type:DataTypes.STRING,
+        allowNull:false
+    },
+    friendName:{
+        type:DataTypes.STRING,
+        allowNull:false
+    },
+    chats:{
+        type:DataTypes.JSON,
+    }
+},{
+    timestamps:false
+});
+
 (async function () {
     try{
        await sequelize.sync();
@@ -97,4 +125,6 @@ let TempEmailStore = sequelize.define('emailStore',{
 module.exports.Users = Users;
 module.exports.TempEmailStore = TempEmailStore;
 module.exports.Friends = Friends;
+module.exports.UserTimeStamp = UserTimeStamp;
+module.exports.Chats = Chats;
 

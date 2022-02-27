@@ -27,7 +27,7 @@ router.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
     }
 });
 
-router.get('/signout',(req,res) => {
+router.get('/signout',objTokenValidation.varifyToken,(req,res) => {
     // now delete token cookie from browser 
     // and redirect that person to login page
     res.clearCookie('jwt');

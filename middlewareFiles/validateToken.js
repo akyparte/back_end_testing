@@ -17,7 +17,7 @@ class Verification{
     }
     isTokenExisted(req,res,next){
         let token = req.cookies.jwt;
-        if(jwt.verify(token,config.JWTKEY)){
+        if(req.cookies.jwt && jwt.verify(token,config.JWTKEY)){
             next();
         }else {
             res.redirect('/');

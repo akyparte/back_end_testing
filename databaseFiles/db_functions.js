@@ -1,6 +1,6 @@
 const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
-const {Users,TempEmailStore,Friends} = require('./database');
+const {Users,TempEmailStore,Friends,UserTimeStamp,Chats} = require('./database');
 const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
 
@@ -140,6 +140,68 @@ class Queries {
           });
 
           return result;
+    }
+
+
+    async saveUsersTimeStamp(username,time){
+         let result = await UserTimeStamp.findOne({
+             where:{username:username}
+         });
+          if(result){
+              result = await UserTimeStamp.update({
+                  status:time
+              },{
+                  where:{
+                      username:username
+                  }
+              });
+
+              if(result[0]){
+                  return {updated:true}
+              }else {
+                  return{updated:false}
+              }
+          }else {
+              result = await UserTimeStamp.create({
+                  username:username,
+                  status:time
+              });
+
+              return {
+                  created:true
+              }
+          }
+    }
+
+    async getUsersTimeStamp(username){
+        let result = await UserTimeStamp.findOne({
+            where:{username:username}
+        });
+
+        if(result){
+            return {result:result.dataValues}
+        }else {
+            return {notUsedEvenOnce:true}
+        }
+    }
+
+
+    async getChats(username,friendName){
+       
+        let result = await Chats.findAll({
+            where:{
+                username:username,
+                friendName:friendName
+            }
+        })
+
+        if(result.length){
+            return {result:result.dataValues,chatsAvailable:true}
+        }else {
+            return {
+                chatsAvailable:false
+            }
+        }
     }
 }
 
