@@ -24,6 +24,7 @@ app.use(cookieParser());
 app.use(express.json())
 app.use(express.urlencoded())
 app.use(express.static(__dirname+'/public'));
+app.use(express.static(__dirname+'/profile_images'))
 
 
 app.get('/', objTokenValidation.varifyToken,(req, res) => {

@@ -3,32 +3,15 @@
 
     let socket = io();
     
-    let btn = document.getElementById('send-mess-btn');
     let no_chat_popup = document.getElementById('no-chat-show');
-    let friend_chat_box_profile = document.getElementById('friend_chat_box_profile');
-    let message_send_box = document.getElementById('message-send-box');
+    let peopleList = document.getElementById('friends');
+    let selected_friend_profile_container = document.getElementById('selected-friend-profile-container');
+    let selected_friend_profile_img = document.getElementById('selected-friend-profile-img');
     let selected_friend_name = document.getElementById('selected-friend-name');
     let selected_friend_status = document.getElementById('selected-friend-status');
-    let peopleList = document.getElementById('friends');
+    let message_send_box = document.getElementById('message-send-box');
 
     
-    socket.on('message',(e) => {
-     alert(e.message);
-    })
-    // btn.addEventListener('click',() => {
-    //     let message = prompt('type');
-    
-    //     let user = message.split(' ')[0];
-    
-    //     socket.emit('message',{
-    //         username:user,
-    //         message:message
-    //     });
-    // })
-
-    socket.on('update_friend_status',(friendName) => {
-         
-    });
     let friends = await fetch('/chat/get_friends',{
         method:'get',
     })
@@ -64,32 +47,53 @@
 
     peopleList.addEventListener('click',async (e) => {
       let friendName;
-      let src;
+      let profileSrc;
       let status;
-      // if(e.target.c)
-      if(e.target.className === 'name'){
-          friendName = e.target.innerText;
-          status = e.target.parentNode.children[1].innerText;
-          src = e.target.parentNode.parentNode.children[0].src;
-      }else if(e.target.className === 'status'){
-        friendName = e.target.parentNode.children[0].innerText;
-        status = e.target.innerText;
-        src = e.target.parentNode.parentNode.children[0].src;
-      }else if(e.target.nodeName === 'IMG'){
-        friendName = e.target.parentNode.children[1].children[0].innerText;
-        src = e.target.src;
-        status = e.target.parentNode.children[1].children[1].innerText;
-      }else if(e.target.children[1].className === 'about'){
-        friendName = e.target.children[1].children[0].innerText;
-        src = e.target.children[0].src;
-        status = e.target.children[1].innerText;
-      }
+      let friend_continer;
+        if(e.target.nodeName === 'LI' && ( e.target.className === 'clearfix' || e.target.className === 'clearfix active')){
+          friendName = e.target.children[1].children[0].innerText.trim();
+          profileSrc = e.target.children[0].src;
+          status = e.target.children[1].children[1].innerText.trim();
+          friend_continer = e.target;
+       }else if(e.target.nodeName === 'IMG'){
+           friendName = e.target.nextElementSibling.children[0].innerText.trim();
+           profileSrc = e.target.src;
+           status = e.target.nextElementSibling.children[1].innerText.trim();
+           friend_continer = e.target.parentNode;
+       }else if(e.target.nodeName === 'DIV' && e.target.className === 'about'){
+           friendName = e.target.children[0].innerText.trim();
+           status = e.target.chilldren[1].innerText.trim();
+           profileSrc = e.target.previousElementSibling.src;
+           friend_continer = e.target.parentNode;
+       }else if(e.target.nodeName === 'DIV' && e.target.className === 'name'){
+           friendName = e.target.innerText.trim();
+           profileSrc = e.target.parentNode.previousElementSibling.src;
+           status = e.target.nextElementSibling.innerText.trim();
+           friend_continer = e.target.parentNode.parentNode;
+       }else if(e.target.nodeName === 'DIV' && e.target.className === 'status'){
+         console.log(e.target.previousElementSibling);
+           friendName = e.target.previousElementSibling.innerText.trim();
+           profileSrc = e.target.parentNode.previousElementSibling.src;
+           status = e.target.innerText.trim();
+           friend_continer = e.target.parentNode.parentNode;
+       }
 
-      console.log(status)
+    if(selected_friend_name.innerText.trim() !== friendName){
+       let friend_list = friend_continer.parentNode;
+        for(let i = 0;i < friend_list.children.length;i++){
+             if(friend_list.children[i].classList.contains('active')){
+              friend_list.children[i].classList.remove('active');
+              break;
+             }
+        }
        selected_friend_name.innerText = friendName;
-       selected_friend_status.innerText = `Last seen: ${status}`;
-       friend_chat_box_profile.children[0].children[0].src = src;
-
+       selected_friend_status.innerText =  `Last seen: ${status}`;
+       selected_friend_profile_img.src = profileSrc;
+         
+       selected_friend_profile_container.style.visibility = 'visible';
+       if(message_send_box.style.visibility != 'visible') message_send_box.style.visibility = 'visible';
+       no_chat_popup.style.display = 'none';
+       friend_continer.classList.add('active');
        let result = await fetch('/chat/get_chats',{
            method:'post',
            headers:{
@@ -97,16 +101,16 @@
            },
            body:JSON.stringify({friendName:friendName})
        })
-
+ 
        result = await result.json();
-
+ 
        if(result.response === 'CHATS'){
-
+ 
        }
+      }
 
-       friend_chat_box_profile.style.visibility = 'visible';
-       message_send_box.style.visibility = 'visible';
-       no_chat_popup.style.display = 'none';
+
+       
         
     });
 
@@ -117,26 +121,33 @@
       
         var interval = seconds / 31536000;
       
+        let finalTime;
         if (interval > 1) {
-          return Math.floor(interval) + " years ago";
+          finalTime = Math.floor(interval);
+          return finalTime === 1 ? `${finalTime} year ago`:`${finalTime} years ago`;
         }
         interval = seconds / 2592000;
         if (interval > 1) {
-          return Math.floor(interval) + " months ago";
+          finalTime = Math.floor(interval);
+          return finalTime === 1 ? `${finalTime} month ago`:`${finalTime} months ago`;
         }
         interval = seconds / 86400;
         if (interval > 1) {
-          return Math.floor(interval) + " days ago";
+          finalTime = Math.floor(interval);
+          return finalTime === 1 ? `${finalTime} day ago`:`${finalTime} days ago`;
+
         }
         interval = seconds / 3600;
         if (interval > 1) {
-          return Math.floor(interval) + " hours ago";
+          finalTime = Math.floor(interval);
+          return finalTime === 1 ? `${finalTime} hour ago`:`${finalTime} hours ago`;
         }
         interval = seconds / 60;
         if (interval > 1) {
-          return Math.floor(interval) + " minutes ago";
+          finalTime = Math.floor(interval);
+          return finalTime === 1 ? `${finalTime} minute ago`:`${finalTime} minutes ago`;
         }
-        return Math.floor(seconds) + " seconds ago";
+        return interval === 1 ? `${interval} second ago`:`${interval} seconds ago`;
       }
 
 

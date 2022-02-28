@@ -242,7 +242,7 @@ body{
        object-fit: cover;
    }
 
-   div.col-lg-6#friend_chat_box_profile img {
+   div.col-lg-6#selected-friend-profile-container img#selected-friend-profile-img {
        width: 40px;
        height: 41px;
        object-position: center;
