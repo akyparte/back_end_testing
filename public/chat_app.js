@@ -10,6 +10,10 @@
     let selected_friend_name = document.getElementById('selected-friend-name');
     let selected_friend_status = document.getElementById('selected-friend-status');
     let message_send_box = document.getElementById('message-send-box');
+    let add_friend_btn = document.getElementById('add-friend-btn');
+    let popup_frame = document.getElementById('popup-frame');
+    let popup = document.querySelector('.card.mycard.mt-5.p-4');
+    let no_friends_popup = document.getElementById('no-friends');
 
     
     let friends = await fetch('/chat/get_friends',{
@@ -40,9 +44,9 @@
         }
     
         peopleList.innerHTML = list;
-    }else if(friends.response === 'NOTRECEIVED'){
-        // alert('server error');
-        // because user is new and dont have any friends
+    }else if(friends.response === 'NOFRIENDS'){
+      no_friends_popup.style.display = 'flex';
+
     }
 
     peopleList.addEventListener('click',async (e) => {
@@ -112,6 +116,25 @@
 
        
         
+    });
+
+
+    add_friend_btn.addEventListener('click',() => {
+      popup_frame.classList.add('appear');
+      popup.setAttribute('id','move');
+      popup.classList.remove('mt-5');
+      popup.classList.remove('fadeout');
+
+    });
+
+
+    popup_frame.addEventListener('click',(e) => {
+      if(e.target.getAttribute('id') === 'popup-frame' || e.target.classList.contains('container')){
+        popup.removeAttribute('id','move');
+        popup.classList.add('fadeout');
+        popup.classList.add('mt-5');
+        popup_frame.classList.remove('appear');
+      }
     });
 
 

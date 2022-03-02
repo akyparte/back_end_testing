@@ -13,18 +13,18 @@ const onlineUsers = require('../DATA_SPACE/online_users');
 
 
 router.get("/", async (req, res) => {
-  let userInfo = jwt.decode(req.cookies.jwt);
-  let userFriends = await objDbFunctions.getUserFriends(userInfo.username);
+  // let userInfo = jwt.decode(req.cookies.jwt);
+  // let userFriends = await objDbFunctions.getUserFriends(userInfo.username);
 
-  if (userFriends.length === 0) {
-    res.sendFile(
-      path.resolve(__dirname + "/../staticPages/chat_app_initialise_user.html")
-    );
-  } else {
+  // if (userFriends.length === 0) {
+  //   res.sendFile(
+  //     path.resolve(__dirname + "/../staticPages/chat_app_logged_user.html")
+  //   );
+  // } else {
     res.sendFile(
       path.resolve(__dirname + "/../staticPages/chat_app_logged_user.html")
     );
-  }
+  // }
 });
 
 router.get("/get_friends", async (req, res) => {
@@ -62,7 +62,7 @@ router.get("/get_friends", async (req, res) => {
      res.json({ response: "RECEIVED", data: friendsData });
    }else {
      // if user does not any friends
-    res.json({ response: "NOTRECEIVED" });
+    res.json({ response: "NOFRIENDS" });
    }
 });
 

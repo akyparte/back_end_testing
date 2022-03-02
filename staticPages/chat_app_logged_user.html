@@ -13,17 +13,21 @@
     <!-- <link rel="stylesheet" href="path/to/font-awesome/css/font-awesome.min.css"> -->
      <script defer src="chat_app.js" type="module"></script>
     <link rel="stylesheet" href="chat_style.css">
+    <link rel="stylesheet" href="search.css">
+
 </head>
 <body>
 <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="//use.fontawesome.com/releases/v5.0.7/css/all.css">
+
  
 
 <div class="container">
 <div class="row clearfix">
     <div class="col-lg-12">
         <div class="card chat-app">
-            <!-- <div id = 'no-friends'> No friends available, add one to continue chatting</div> -->
-            <img src="no_chat.svg" id = 'no-chat-show'>
+            <div id = 'no-friends' style="display: none;"> No users added , click on add button to get started</div>
+            <img src="chatbot.png" id = 'no-chat-show'>
             <div id="plist" class="people-list">
                 <div class="input-group">
                     <div class="input-group-prepend">
@@ -64,7 +68,7 @@
                             <a href="javascript:void(0);" class="btn btn-outline-secondary">
                                 <img src="./user-solid.svg" style = 'width: 40px;height:30px;'alt="">
                                 </a>
-                            <a href="javascript:void(0);" class="btn btn-outline-primary"> 
+                            <a href="javascript:void(0);" class="btn btn-outline-primary" id = 'add-friend-btn'> 
                                 <!-- <i class="fa fa-image"></i> -->
                                   <img src="./user-plus-solid.svg" style = 'width: 40px;height:30px;' alt="">
                             </a>
@@ -108,7 +112,7 @@
                         </li> -->
                     </ul>
                 </div>
-                <div class="chat-message clearfix" id = 'message-send-box'style="visibility: hidden;">
+                <div class="chat-message clearfix" id = 'message-send-box' >
                     <div class="input-group mb-0">
                         <div class="input-group-prepend" id = 'send-mess-btn'>
                             <span class="input-group-text"><i class="fa fa-send"></i></span>
@@ -122,8 +126,26 @@
 </div>
 </div>
 
-<script type="text/javascript">
+<div class= 'blur' id = 'popup-frame'>
+    <div class="container d-flex justify-content-center">
+        <div class="card mycard mt-5 p-4 fadeout">
+            <div class="input-group mb-3"> <input type="text" class="form-control">
+                <div class="input-group-append"><button class="btn btn-primary"><i class="fas fa-search"></i></button></div>
+            </div> <span class="text mb-4">Search results</span>
+            <div id = 'user-cart'class="flex-row justify-content-between mb-3">
+                <div class="d-flex flex-column p-3" id = 'username-cart'>
+                    <p class="mb-1">Logo and marketing material </p>
+                </div>
+                <div id = 'user-cart-box'class="price" >
+                    <div id = 'user-pic' >
 
-</script>
+                    </div>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
 </body>
 </html>
