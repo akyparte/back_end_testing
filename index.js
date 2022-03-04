@@ -3,6 +3,7 @@ const cookie = require('cookie');
 const login_system_route = require('./Routers/login_system_routes');
 const forgot_route = require('./Routers/forgot_password_routes');
 const clsTokenValidation = require('./middlewareFiles/validateToken');
+let search_user_route = require('./Routers/search_user_routes');
 const objTokenValidation = new clsTokenValidation();
 const chat_router = require('./Routers/chat_home_routes');
 const cookieParser = require('cookie-parser');
@@ -36,7 +37,9 @@ app.use('/',login_system_route);
 
 app.use('/forgot_password',objTokenValidation.isTokenExisted,forgot_route);
 
-app.use('/chat',objTokenValidation.isTokenExisted,chat_router)
+app.use('/chat',objTokenValidation.isTokenExisted,chat_router);
+
+app.use('/search',objTokenValidation.isTokenExisted,search_user_route);
 
 
 

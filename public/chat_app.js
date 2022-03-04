@@ -1,4 +1,4 @@
-// import '/chat_app1.js';
+import '/chat_app1.js';
 (async function () {
 
     let socket = io();
@@ -14,6 +14,10 @@
     let popup_frame = document.getElementById('popup-frame');
     let popup = document.querySelector('.card.mycard.mt-5.p-4');
     let no_friends_popup = document.getElementById('no-friends');
+    let search_user_box = document.getElementById('search_user_box');
+    let search_input = document.getElementById('search_user_input');
+
+
 
     
     let friends = await fetch('/chat/get_friends',{
@@ -130,6 +134,10 @@
 
     popup_frame.addEventListener('click',(e) => {
       if(e.target.getAttribute('id') === 'popup-frame' || e.target.classList.contains('container')){
+        search_input.value = ''
+        if(search_user_box.children.length === 3){
+          search_user_box.removeChild(search_user_box.children[2]);
+        }
         popup.removeAttribute('id','move');
         popup.classList.add('fadeout');
         popup.classList.add('mt-5');

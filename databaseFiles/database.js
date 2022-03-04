@@ -105,8 +105,8 @@ let Chats = sequelize.define('chats',{
         type:DataTypes.STRING,
         allowNull:false
     },
-    chats:{
-        type:DataTypes.JSON,
+    profileUrl:{
+        type:DataTypes.STRING,
     }
 },{
     timestamps:false

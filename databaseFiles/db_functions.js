@@ -203,6 +203,92 @@ class Queries {
             }
         }
     }
+
+    async getUserWithProfile(username){
+        // this function finds user and returns his name and profile
+        // because in front-end when user search for a friend, request comes here
+
+
+        let user = await Users.findOne({
+           where:{username:username}
+        })
+        if(user){
+           return {
+                 username:user.dataValues.username,
+                 profileSrc:user.dataValues.profileSrc,
+                 userExists:true
+                  }
+        }else {
+            return {userExists:false}
+        }
+      
+      }
+      
+      
+    async saveNewFriend(username,friendName,profileSrc){
+      
+        // now need to get user's info because we have to add this user in his friend's list
+        let userNameToAddInFriendTable;
+        let userProfileSrcToAddInFriendTable;
+      
+      
+        let userinfo = await User.findOne({
+           where:{username:username}
+         });
+        if(userinfo){
+            userNameToAddInFriendTable = userInfo.dataValues.username;
+            userProfileSrcToAddInFriendTable = userInfo.dataValues.profileSrc;
+         }
+      
+        let previousChatId = await Friends.findOne({
+           where:{username:username,friendName:friendName}
+        });
+      
+       let chatId;
+       if(previousChatId){
+          chatId = previousChatId.dataValues.chatId+1;
+        }
+      
+         if(previousChatId.dataValues.chatId){
+           let finalResult = {};
+           let result = await Friends.bulkCreate({
+                     username:username,
+                     friend:friendName,
+                     profileSrc:profileSrc,
+                     chatId:chatId
+                  },
+               {
+                  username:friendName,
+                  friend: userNameToAddInFriendTable,
+                  profileSrc:userProfileSrcToAddInFriendTable,
+                  chatId:chatId
+             })
+           if(result){
+              finalResult.friendAdded = true;
+                 // because we want time stamp of friend not that actice user
+                 let friendtimeStamp = await timeStamp.findOne({
+                     where:{username:friendName}
+                 })
+                 if(friendtimeStamp){
+                    finalResult.timeStamp = friendtimeStamp.dataValues.status;
+                    return finalResult;
+                 }else {
+                    // means user exist but never used chatting website 
+                    // so return new user
+                    finalResult.timeStamp = 'New User';
+                     return finalResult;
+                 }
+            }else {
+              finalResult.friendAdded = false;
+          }
+        }
+      
+          
+    }
+
+
+    
+
 }
 
 module.exports = Queries;
