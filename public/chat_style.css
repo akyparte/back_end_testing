@@ -265,6 +265,33 @@ body{
     object-position: center;
     object-fit: cover;
 }
+
+div.chat div.chat-history div.other-message:after {
+     display: none;
+}
+
+div.chat div.chat-history div.my-message:after {
+   display: none;
+}
+div.chat div.chat-history div.message-data{
+   margin-bottom: 5px;
+}
+
+
+div.chat div.chat-history {
+    padding: 0;
+}
+
+div.chat div.chat-history ul.m-b-0{
+    margin-bottom: 0;
+    padding: 20px 20px 0 20px;
+}
+
+.chat .chat-history .other-message {
+    min-width: max-content;
+    max-width: 90%;
+}
+
 /* ------------------------------------------------------------ */
 
 

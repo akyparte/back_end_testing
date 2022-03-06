@@ -24,7 +24,6 @@ let Users = sequelize.define('Users',{
     email:{
         type:DataTypes.STRING(30),
         allowNull:false,
-        unique:true
     },
     password:{
         type:DataTypes.STRING,
@@ -33,6 +32,9 @@ let Users = sequelize.define('Users',{
     uniqueID:{
         type:DataTypes.STRING,
         allowNull:false
+    },
+    profileUrl:{
+        type:DataTypes.STRING(600)
     }
 },{
     indexes:[
@@ -51,14 +53,22 @@ let Friends = sequelize.define('Friends',{
         allowNull:false,
     },
     friend:{
-        type:DataTypes.STRING(25)
+        type:DataTypes.STRING(25),
+        allowNull:false
     },
     profileUrl:{
-        type:DataTypes.STRING
-    }
+        type:DataTypes.STRING(500),
+        allowNull:false
+    },
 
 },{
-    timestamps:false
+    timestamps:false,
+    indexes:[
+        {
+            unique: true,
+            fields: ['username','friend']
+          }
+    ],
 });
 
 let TempEmailStore = sequelize.define('emailStore',{
@@ -105,9 +115,6 @@ let Chats = sequelize.define('chats',{
         type:DataTypes.STRING,
         allowNull:false
     },
-    profileUrl:{
-        type:DataTypes.STRING,
-    }
 },{
     timestamps:false
 });

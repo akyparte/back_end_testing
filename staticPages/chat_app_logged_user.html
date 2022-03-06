@@ -77,21 +77,21 @@
                         </div>
                     </div>
                 </div>
-                <div class="chat-history" style="overflow-y: auto;height:500px">
-                    <ul class="m-b-0" style="visibility: hidden;">
-                        <li class="clearfix">
+                <div class="chat-history">
+                    <ul class="m-b-0" id = 'message-container' style="overflow-y: auto;height:500px">
+                        <!-- <li class="clearfix">
                             <div class="message-data text-right">
                                 <span class="message-data-time">10:10 AM, Today</span>
                                 <img src="https://bootdey.com/img/Content/avatar/avatar7.png" alt="avatar">
                             </div>
-                            <div class="message other-message float-right"> Hi Aiden, how are you? How is the project coming along? </div>
-                        </li>
-                        <li class="clearfix">
+                            <div class="message other-message float-right"> Hi Aiden, how are </div>
+                        </li> -->
+                        <!-- <li class="clearfix">
                             <div class="message-data">
-                                <span class="message-data-time">10:12 AM, Today</span>
+                                <span class="message-data-time">10:12 AM, 5/5/2022</span>
                             </div>
                             <div class="message my-message">Are we meeting today?</div>                                    
-                        </li>                               
+                        </li>                                -->
                         <!-- <li class="clearfix">
                             <div class="message-data">
                                 <span class="message-data-time">10:15 AM, Today</span>
@@ -117,7 +117,7 @@
                         <div class="input-group-prepend" id = 'send-mess-btn'>
                             <span class="input-group-text"><i class="fa fa-send"></i></span>
                         </div>
-                        <input type="text" class="form-control" placeholder="Enter text here...">                                    
+                        <input type="text" class="form-control" placeholder="Enter text here..." id = 'send-mess-input-field'>                                    
                     </div>
                 </div>
             </div>
@@ -132,7 +132,7 @@
             <div class="input-group mb-3"> <input type="text" class="form-control" id = 'search_user_input'>
                 <div class="input-group-append"><button id = 'search_user_btn' class="btn btn-primary"><i class="fas fa-search"></i></button></div>
             </div> <span class="text mb-4" id = 'search_status_bar'>Search results</span>
-            <div id = 'user-cart'class="flex-row justify-content-between mb-3">
+            <!-- <div id = 'user-cart'class="flex-row justify-content-between mb-3">
                 <div class="d-flex flex-column p-3" id = 'username-cart'>
                     <p class="mb-1">Logo and marketing material </p>
                 </div>
@@ -141,7 +141,7 @@
 
                     </div>
                 </div>
-            </div>
+            </div> -->
         </div>
     </div>
 </div>

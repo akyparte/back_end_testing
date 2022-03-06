@@ -2,7 +2,7 @@ import '/chat_app1.js';
 (async function () {
 
     let socket = io();
-    
+    let selectedFriendName;
     let no_chat_popup = document.getElementById('no-chat-show');
     let peopleList = document.getElementById('friends');
     let selected_friend_profile_container = document.getElementById('selected-friend-profile-container');
@@ -16,17 +16,17 @@ import '/chat_app1.js';
     let no_friends_popup = document.getElementById('no-friends');
     let search_user_box = document.getElementById('search_user_box');
     let search_input = document.getElementById('search_user_input');
+    let send_mess_input_field = document.getElementById('send-mess-input-field');
+    let message_container = document.getElementById('message-container');
 
 
-
-    
     let friends = await fetch('/chat/get_friends',{
         method:'get',
     })
 
     friends = await friends.json();
-
-    if(friends.response === 'RECEIVED'){ 
+     
+    if(friends.hasFriends){ 
         let list = '';
         for(let i = 0;i < friends.data.length;i++){
             let status;
@@ -34,8 +34,10 @@ import '/chat_app1.js';
             if(friends.data[i].status === 'online'){
                 status = 'online';
                 active = 'online';
-            }else if(status !== 'new User'){
+            }else if(friends.data[i].status !== 'New User'){
                 status = timeSince(new Date(friends.data[i].status)); 
+            }else {
+              status = friends.data[i].status;
             }
 
              list = list+`<li class="clearfix">
@@ -48,45 +50,44 @@ import '/chat_app1.js';
         }
     
         peopleList.innerHTML = list;
-    }else if(friends.response === 'NOFRIENDS'){
+    }else if(!friends.hasFriends){
       no_friends_popup.style.display = 'flex';
-
     }
 
     peopleList.addEventListener('click',async (e) => {
       let friendName;
-      let profileSrc;
+      let profileUrl;
       let status;
       let friend_continer;
         if(e.target.nodeName === 'LI' && ( e.target.className === 'clearfix' || e.target.className === 'clearfix active')){
           friendName = e.target.children[1].children[0].innerText.trim();
-          profileSrc = e.target.children[0].src;
+          profileUrl = e.target.children[0].src;
           status = e.target.children[1].children[1].innerText.trim();
           friend_continer = e.target;
        }else if(e.target.nodeName === 'IMG'){
            friendName = e.target.nextElementSibling.children[0].innerText.trim();
-           profileSrc = e.target.src;
+           profileUrl = e.target.src;
            status = e.target.nextElementSibling.children[1].innerText.trim();
            friend_continer = e.target.parentNode;
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'about'){
            friendName = e.target.children[0].innerText.trim();
            status = e.target.chilldren[1].innerText.trim();
-           profileSrc = e.target.previousElementSibling.src;
+           profileUrl = e.target.previousElementSibling.src;
            friend_continer = e.target.parentNode;
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'name'){
            friendName = e.target.innerText.trim();
-           profileSrc = e.target.parentNode.previousElementSibling.src;
+           profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.nextElementSibling.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'status'){
          console.log(e.target.previousElementSibling);
            friendName = e.target.previousElementSibling.innerText.trim();
-           profileSrc = e.target.parentNode.previousElementSibling.src;
+           profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
        }
 
-    if(selected_friend_name.innerText.trim() !== friendName){
+      if(selected_friend_name.innerText.trim() !== friendName){
        let friend_list = friend_continer.parentNode;
         for(let i = 0;i < friend_list.children.length;i++){
              if(friend_list.children[i].classList.contains('active')){
@@ -96,7 +97,7 @@ import '/chat_app1.js';
         }
        selected_friend_name.innerText = friendName;
        selected_friend_status.innerText =  `Last seen: ${status}`;
-       selected_friend_profile_img.src = profileSrc;
+       selected_friend_profile_img.src = profileUrl;
          
        selected_friend_profile_container.style.visibility = 'visible';
        if(message_send_box.style.visibility != 'visible') message_send_box.style.visibility = 'visible';
@@ -115,11 +116,13 @@ import '/chat_app1.js';
        if(result.response === 'CHATS'){
  
        }
-      }
+       }  
 
+       selectedFriendName = friendName;
 
-       
-        
+      //  send_mess_input_field.addEventListener('click',sendMessage);
+      send_mess_input_field.addEventListener('keypress',sendMessage)
+      
     });
 
 
@@ -182,5 +185,54 @@ import '/chat_app1.js';
       }
 
 
+    function sendMessage(e) {
+      // console.log('s');
+      let input = send_mess_input_field.value.trim();
+       if(e.key === 'Enter'){
+         let d = new Date();
+          let time = formatAMPM(d);
+          let date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+         let message = `<li class="clearfix">
+                             <div class="message-data text-right">
+                                  <span class="message-data-time">${time}, ${date}</span>
+                             </div>
+                             <div class="message other-message float-right"> 
+                                 ${input}
+                             </div>
+                        </li>`;
+
+          message_container.insertAdjacentHTML('beforeend',message);
+          console.log(message_container.scrollHeight);
+          console.log(message_container.scrollTop);
+          console.log(message_container.s);
+          message_container.scrollTop = message_container.scrollHeight;
+          // now sending message to user
+          send_mess_input_field.value = '';
+          let messageBox = {
+            friendName:selectedFriendName,
+            message:input.trim(),
+            timeStamp:d
+          }
+
+          socket.emit('send-message',messageBox)
+
+       }
+    }  
+
+
+    function formatAMPM(date) {
+      var hours = date.getHours();
+      var minutes = date.getMinutes();
+      var ampm = hours >= 12 ? 'pm' : 'am';
+      hours = hours % 12;
+      hours = hours ? hours : 12; // the hour '0' should be '12'
+      minutes = minutes < 10 ? '0'+minutes : minutes;
+      var strTime = hours + ':' + minutes + ' ' + ampm;
+      return strTime;
+    }
+
+    socket.on('receive-message',(m) => {
+         
+    })
 
 })();

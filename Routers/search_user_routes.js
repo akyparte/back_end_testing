@@ -9,12 +9,18 @@ const objDbFunctions = new cls_db_functions();
 
 
 router.post('/getUserInfo',async (req,res) => {
-       
+       let username = jwt.decode(req.cookies.jwt).username;
+       let friendName = req.body.username;
+       let checkFriend = await objDbFunctions.isAlreadyFriend(username,friendName);
+       if(checkFriend.alreadyFriend){
+          res.json({alreadyFriend:true});
+          return;
+       }
        let user = await objDbFunctions.getUserWithProfile(req.body.username);
        if(user.userExists){
-            let frd = jwt.sign({friendName:user.username,profileSrc:user.profileSrc},config.JWTKEY);
+            let frd = jwt.sign({friendName:user.username,profileUrl:user.profileUrl},config.JWTKEY);
             res.cookie('frd',frd);
-            res.json({userExist:true,friendName:user.username,profileSrc:user.profileSrc})
+            res.json({userExist:true,friendName:user.username,profileUrl:user.profileUrl})
        }else {
             res.json({userExist:false})
         }
@@ -22,16 +28,16 @@ router.post('/getUserInfo',async (req,res) => {
     
 })
 
-router.post('/addFriend',async (req,res) => {
-
-  let friendInfo = jwt.decode(req.cookies.frd).friendName;
+router.get('/addFriend',async (req,res) => {
+   console.log('came');
+  let friendInfo = jwt.decode(req.cookies.frd);
   let friendName = friendInfo.friendName;
-  let profileSrc = friendInfo.profileSrc
+  let profileUrl = friendInfo.profileUrl
   let username = jwt.decode(req.cookies.jwt).username;
 
-  let result = await objDbFunctions.saveNewFriend(username,friendName,profileSrc);
+  let result = await objDbFunctions.saveNewFriend(username,friendName,profileUrl);
    if(result.friendAdded){
-      res.json({friendAdded:true,status:result.timeStamp,friendName:friendName,profileSrc:profileSrc});
+      res.json({friendAdded:true,status:result.timeStamp,friendName:friendName,profileUrl:profileUrl});
    }else {
       res.json({friendAdded:false})
    }

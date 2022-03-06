@@ -13,18 +13,9 @@ const onlineUsers = require('../DATA_SPACE/online_users');
 
 
 router.get("/", async (req, res) => {
-  // let userInfo = jwt.decode(req.cookies.jwt);
-  // let userFriends = await objDbFunctions.getUserFriends(userInfo.username);
-
-  // if (userFriends.length === 0) {
-  //   res.sendFile(
-  //     path.resolve(__dirname + "/../staticPages/chat_app_logged_user.html")
-  //   );
-  // } else {
     res.sendFile(
       path.resolve(__dirname + "/../staticPages/chat_app_logged_user.html")
     );
-  // }
 });
 
 router.get("/get_friends", async (req, res) => {
@@ -48,7 +39,7 @@ router.get("/get_friends", async (req, res) => {
                   friendsData.push({
                      friendName:userFriends[i].dataValues.friend,
                      profileUrl: userFriends[i].dataValues.profileUrl,
-                     status:'new User'
+                     status:'New User'
                   })
                 }else {
                  friendsData.push({
@@ -59,10 +50,10 @@ router.get("/get_friends", async (req, res) => {
                 }
             }
        }
-     res.json({ response: "RECEIVED", data: friendsData });
+     res.json({ hasFriends:true, data: friendsData });
    }else {
      // if user does not any friends
-    res.json({ response: "NOFRIENDS" });
+    res.json({ hasFriends: false });
    }
 });
 
@@ -71,7 +62,7 @@ router.post('/get_chats',async(req,res) => {
     let friendName = req.body.friendName;
     if(req.cookies.jwt){
       var userInfo = jwt.decode(req.cookies.jwt);
-
+      
     }
 
     let chats = await objDbFunctions.getChats(userInfo.username,friendName);
