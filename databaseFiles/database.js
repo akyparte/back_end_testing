@@ -4,7 +4,6 @@ const sequelize = new Sequelize(config.database,config.username,config.password,
     host:config.host,
     dialect:config.dialect,
 });
-
 (async function() {
     try{
        await sequelize.authenticate();
@@ -18,23 +17,23 @@ const sequelize = new Sequelize(config.database,config.username,config.password,
 
 let Users = sequelize.define('Users',{
     username:{
-        type:DataTypes.STRING(25),
+        type:DataTypes.STRING(30),
         allowNull:false,
     },
     email:{
-        type:DataTypes.STRING(30),
+        type:DataTypes.STRING(40),
         allowNull:false,
     },
     password:{
         type:DataTypes.STRING,
         allowNull:false,
     },
-    uniqueID:{
-        type:DataTypes.STRING,
-        allowNull:false
-    },
+    // uniqueID:{
+    //     type:DataTypes.STRING,
+    //     allowNull:false
+    // },
     profileUrl:{
-        type:DataTypes.STRING(600)
+        type:DataTypes.STRING(100)
     }
 },{
     indexes:[
@@ -46,20 +45,25 @@ let Users = sequelize.define('Users',{
     timestamps:false
 
 });
+Users.removeAttribute('id');
 
 let Friends = sequelize.define('Friends',{
     username:{
-        type:DataTypes.STRING(25),
+        type:DataTypes.STRING(30),
         allowNull:false,
     },
     friend:{
-        type:DataTypes.STRING(25),
+        type:DataTypes.STRING(30),
         allowNull:false
     },
     profileUrl:{
-        type:DataTypes.STRING(500),
+        type:DataTypes.STRING(100),
         allowNull:false
     },
+    chatId:{
+        type:DataTypes.STRING(40),
+        allowNull:false
+    }
 
 },{
     timestamps:false,
@@ -71,13 +75,14 @@ let Friends = sequelize.define('Friends',{
     ],
 });
 
+Friends.removeAttribute('id');
 let TempEmailStore = sequelize.define('emailStore',{
     email:{
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(40),
         allowNull:false
     },
     OTP:{
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(6),
         allowNull:false
     }
 },{
@@ -93,11 +98,11 @@ let TempEmailStore = sequelize.define('emailStore',{
 
 let UserTimeStamp = sequelize.define('userTime',{
     username:{
-        type:DataTypes.STRING(25),
+        type:DataTypes.STRING(30),
         allowNull:false
     },
     status:{
-        type:DataTypes.STRING,
+        type:DataTypes.STRING(70),
         allowNull:false
     }
 },
@@ -105,19 +110,61 @@ let UserTimeStamp = sequelize.define('userTime',{
     timestamps:false
 });
 
+UserTimeStamp.removeAttribute('id');
+
 
 let Chats = sequelize.define('chats',{
-    username:{
-        type:DataTypes.STRING,
+    chatId:{
+        type:DataTypes.STRING(40),
         allowNull:false
     },
-    friendName:{
-        type:DataTypes.STRING,
+    user:{
+        type:DataTypes.STRING(30),
+        allowNull:false
+    },
+    message:{
+        type:DataTypes.STRING(600),
+        allowNull:false
+    },
+    timeStamp:{ 
+        type:DataTypes.STRING(70),
         allowNull:false
     },
 },{
-    timestamps:false
+    indexes:[
+        {
+            fields: ['chatId']
+          }
+    ],
+    timestamps:false,
 });
+
+Chats.removeAttribute('id');
+
+let UnreadChatCount = sequelize.define('unReadChatCount',{
+     username:{
+         type:DataTypes.STRING(30),
+         allowNull:false
+     },
+     friend:{
+         type:DataTypes.STRING(30),
+         allowNull:false
+     },
+     chatCount:{
+         type:DataTypes.INTEGER
+     }
+},{
+    indexes:[
+          {
+            unique: true,
+            fields: ['username','friend']
+          }
+    ],
+    timestamps:false
+
+});
+
+UnreadChatCount.removeAttribute('id');
 
 (async function () {
     try{
@@ -134,4 +181,6 @@ module.exports.TempEmailStore = TempEmailStore;
 module.exports.Friends = Friends;
 module.exports.UserTimeStamp = UserTimeStamp;
 module.exports.Chats = Chats;
+module.exports.UnreadChatCount = UnreadChatCount;
+module.exports.Sequelize = Sequelize;
 

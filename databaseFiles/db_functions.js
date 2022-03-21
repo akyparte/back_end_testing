@@ -1,8 +1,9 @@
 const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
-const {Users,TempEmailStore,Friends,UserTimeStamp,Chats} = require('./database');
+const {Users,TempEmailStore,Friends,UserTimeStamp,Chats,UnreadChatCount,Sequelize} = require('./database');
 const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
+let unReadChatCount = require('../unReadChats/unreadChatsCount');
 
 class Queries {
   
@@ -22,7 +23,7 @@ class Queries {
               username:username,
               password:hashedPassword,
               email:email,
-              uniqueID:ID
+            //   uniqueID:ID
           })
         
            return { data:result.dataValues, isCreated:true }       
@@ -186,22 +187,88 @@ class Queries {
     }
 
 
-    async getChats(username,friendName){
-       
-        let result = await Chats.findAll({
-            where:{
-                username:username,
-                friendName:friendName
-            }
-        })
+    // async getChats(chatId,unreadChatCount){
+    //     let limit;
+    //     if(unreadChatCount>= 6){
+    //         limit = unreadChatCount;
+    //     }else limit = 6;
 
-        if(result.length){
-            return {result:result.dataValues,chatsAvailable:true}
-        }else {
+    //     let chatCount = await Chats.count({
+    //         where:{
+    //             chatId:chatId
+    //         }
+    //     })
+         
+    //     if(chatCount === 0){
+    //         return {
+    //             chatsAvailable:false
+    //         }
+    //     }else {
+    //         let chats;
+    //         if(chatCount <= 6){
+    //             chats = await Chats.findAll({
+    //                 where:{chatId:chatId},
+    //                 offset:chatCount-limit
+    //             })
+    //             // limit = 0
+    //         }else {
+    //             chats = await Chats.findAll({
+    //                 where:{chatId:chatId},
+    //             })
+    //         }
+            
+    //         chats = chats.map(obj => obj.dataValues);
+    //         return {result:chats,chatsAvailable:true}
+    //     }
+
+
+
+
+    //     // if(chats.length){
+    //     //     chats = chats.map(obj => obj.dataValues);
+    //     //     return {result:chats,chatsAvailable:true}
+    //     // }else {
+    //     //     return {
+    //     //         chatsAvailable:false
+    //     //     }
+    //     // }
+    // }
+
+
+    async getChats(chatId,unreadChatCount){
+         // check if chats are available or not
+        let chatCount = await Chats.count({
+            where:{
+                chatId:chatId
+            }
+        });
+        let chats;
+        if(chatCount === 0){
             return {
                 chatsAvailable:false
             }
+        }else if(chatCount <= 6){
+            chats = await Chats.findAll({
+                where:{chatId:chatId},
+            })
+            chats = chats.map(obj => obj.dataValues);
+            return {result:chats,chatsAvailable:true}
+        }else {
+            let limit;
+            if(unreadChatCount>= 6){
+                 limit = unreadChatCount;
+            }else limit = 6;
+
+            chats = await Chats.findAll({
+                where:{chatId:chatId},
+                offset:chatCount-limit
+            });
+
+            chats = chats.map(obj => obj.dataValues);
+            return {result:chats,chatsAvailable:true}
         }
+
+
     }
 
     async getUserWithProfile(username){
@@ -236,7 +303,7 @@ class Queries {
           }
     }  
       
-    async saveNewFriend(username,friendName,profileUrl){
+    async saveNewFriend(username,friendName,profileUrl,needForTimeStamp){
       
         // now need to get user's info because we have to add this user in his friend's list
         let userNameToAddInFriendTable;
@@ -265,20 +332,26 @@ class Queries {
                           chatId:chatId
                      }]);
                    if(result.length){
+                       finalResult.newFriend = {fri_name:friendName,pro:profileUrl,chatId:chatId}
                       finalResult.friendAdded = true;
                          // because we want time stamp of friend not that actice user
-                         let friendtimeStamp = await UserTimeStamp.findOne({
-                             where:{username:friendName}
-                         })
-                         if(friendtimeStamp){
-                            finalResult.timeStamp = friendtimeStamp.dataValues.status;
-                            return finalResult;
-                         }else {
-                            // means user exist but never used chatting website 
-                            // so return new user
-                            finalResult.timeStamp = 'New User';
-                             return finalResult;
+                         // because if user is online no need to look for timestamp
+                         if(needForTimeStamp){
+                             let friendtimeStamp = await UserTimeStamp.findOne({
+                                 where:{username:friendName}
+                             })
+                             if(friendtimeStamp){
+                                finalResult.timeStamp = friendtimeStamp.dataValues.status;
+                                return finalResult;
+                             }else {
+                                // means user exist but never used chatting website 
+                                // so return new user
+                                finalResult.timeStamp = 'New User';
+                                 return finalResult;
+                             }
                          }
+                         return finalResult;
+
                     }else {
                       finalResult.friendAdded = false;
                   }
@@ -287,7 +360,91 @@ class Queries {
           
     }
 
+    async saveChats(chatId,messageObj){
+        let messageObjArrayWithChatId = messageObj.map(obj =>{  
+             obj.chatId = chatId;
+            return obj  
+        })
+            let result = await Chats.bulkCreate(messageObjArrayWithChatId);
 
+         if(result){
+            return {saved:true}
+         }else {
+             return {saved:false}
+         }
+    }
+
+    async saveChatCount(username,friend,count){
+            let result = await UnreadChatCount.findOne({
+                where:{
+                    username:username,
+                    friend:friend
+                }
+            });
+
+             let updated = await UnreadChatCount.update({
+                 chatCount:result.dataValues.chatCount + count
+             },{
+                 where:{
+                     username:username,
+                     friend:friend
+                 }
+             });
+
+             if(updated){
+                 return true;
+             }else {
+                 return false;
+             }
+         
+    }
+
+    async createUserForChatCount(username,friend){
+          let created = await UnreadChatCount.create({
+              username:username,
+              friend:friend,
+              chatCount:0
+          });
+          if(created){
+              return true;
+          }else {
+              return false;
+          }
+    }
+
+    async resetChatCount(username,friend){
+          let result = await UnreadChatCount.update({
+              chatCount:0
+          },{
+              where:{
+                  username:username,
+                  friend:friend
+              }
+          });
+
+          if(result) return true;
+          else return false;
+
+    }
+
+
+    async getUnreadChatCount(username,friend){
+        let chatCount = 0;
+        if(unReadChatCount[username] && unReadChatCount[username][friend]){
+            chatCount = unReadChatCount[username][friend];
+       }
+            let result = await UnreadChatCount.findOne({
+                where:{
+                    username:username,
+                    friend:friend
+                }
+            });
+            if(result){
+                return result.dataValues.chatCount+chatCount;
+            }else {
+                return chatCount;
+            }
+    }
     
 
 }

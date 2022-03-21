@@ -15,8 +15,8 @@ router.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
         if(result.validUser){
           let payload = {
             username:username,
-            date:Date.now(),
-            id:result.user.uniqueID
+            // date:Date.now(),
+            // id:result.user.uniqueID
           }
           let token = jwt.sign(payload,config.JWTKEY);
           res.cookie('jwt',token);

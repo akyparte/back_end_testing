@@ -292,6 +292,108 @@ div.chat div.chat-history ul.m-b-0{
     max-width: 90%;
 }
 
+
+li.fri-list {
+   position: relative;
+}
+
+div.unchecked-mess-box{
+  position: absolute;
+  top: 30%;
+  right: 10%;
+  min-width: 24px;
+  min-height: 24px;
+  box-shadow: rgba(0, 0, 0, 0.12) 0px 1px 3px, rgba(0, 0, 0, 0.24) 0px 1px 2px;
+  border-radius: 50%;
+  font-size: 0.8rem;
+  /* display: flex; */
+  /* because at first event will be hidden*/
+  display: none;
+  justify-content: center;
+  align-items: center;
+  background-color: #7dc530;
+  color: rgb(31, 3, 3);
+}
+
+div.unchecked-mess-box p {
+    width: min-content;
+    height: min-content;
+    padding: 0 0.2rem;
+    margin-bottom: 0;
+}
+
+
+div.visible {
+    display: flex;
+}
+
+#unread-chat-count {
+    margin-left: 40%; 
+    border: 1px solid rgb(56, 56, 56); 
+    background-color: aliceblue;width: fit-content; 
+    padding: 0 0.2rem;
+    border-radius: 5px;
+}
+
+
+/* loading popup styles---------------------------------------- */
+
+ /* body { */
+    /* height: 90vh; */
+    /* background: #1d2630; */
+    /* display: flex; */
+    /* justify-content: center; */
+    /* align-items: center; */
+/* }  */
+
+.spinner-box {
+    width: 160px;
+    height: 160px;
+    /* display: flex; */
+    /* normally display is none cause we dont want to show directly */
+    display: 'none';
+    justify-content: center;
+    align-items: center;
+    background: transparent;
+    position: absolute;
+    top: 44%;
+    left: 53%;
+}
+
+.circle-box {
+    width: 80px;
+    height: 80px;
+    padding: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgb(104, 104, 104);
+    background: linear-gradient(0deg,rgba(63,249,220,0.1)33%,rgb(204, 204, 204)100%);
+    animation: spin .8s linear 0s infinite;
+}
+
+div.circle-core {
+    width: 100%;
+    height: 100%;
+    /* background: #fffafa; */
+    background: white;
+    border-radius: 50%;
+}
+
+@keyframes spin{
+    from{
+        transform: rotate(0);
+    }
+    to {
+        transform: rotate(359deg);
+    }
+} 
+
+/* loading popup styles---------------------------------------- */
+
+
+
 /* ------------------------------------------------------------ */
 
 
