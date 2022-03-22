@@ -100,17 +100,17 @@ router.post('/get_chats',async(req,res) => {
     let chats = await objDbFunctions.getChats(chatId,chatCount);
     if(chatsArray[chatId] && chatsArray[chatId].length > 0 && chats.chatsAvailable){
         chats.result.push(...chatsArray[chatId]);
-        res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount});
+        res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount,requestId:req.body.requestId});
         let result = await objDbFunctions.saveChats(chatId,chatsArray[chatId]);
         chatsArray[chatId] = [];
     }else if(chats.chatsAvailable){
-      res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount})
+      res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount,requestId:req.body.requestId})
     }else if(chatsArray[chatId] && chatsArray[chatId].length > 0){
-      res.json({chats:true,owner:userInfo.username,chatData:chatsArray[chatId],chatCount:chatCount});
+      res.json({chats:true,owner:userInfo.username,chatData:chatsArray[chatId],chatCount:chatCount,requestId:req.body.requestId});
       let result = await objDbFunctions.saveChats(chatId,chatsArray[chatId]);
       chatsArray[chatId] = [];
     }else {
-      res.json({chats:false});
+      res.json({chats:false,requestId:req.body.requestId});
     }
 
     // clearing chatCount from unReadChatCount array and database , becuase once user sees

@@ -351,7 +351,7 @@ div.visible {
     height: 160px;
     /* display: flex; */
     /* normally display is none cause we dont want to show directly */
-    display: 'none';
+    display: none;
     justify-content: center;
     align-items: center;
     background: transparent;

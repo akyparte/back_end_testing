@@ -1,6 +1,6 @@
 import '/chat_app1.js';
 (async function () {
-    let getChatRequestStatus = false;
+    let currentChatRequestId = 0;
     let socket = io();
     let chatIdObj = {};
     let selectedFriendName;
@@ -23,49 +23,9 @@ import '/chat_app1.js';
     let search_status_bar = document.getElementById('search_status_bar');
     let loading_box = document.getElementById('loading-box');
 
-
-    let friends = await fetch('/chat/get_friends',{
-        method:'get',
-    })
-
-    friends = await friends.json();
-     console.log(friends);
-    if(friends.hasFriends){ 
-        let list = '';
-        for(let i = 0;i < friends.data.length;i++){
-            chatIdObj[i] = {
-               friend: friends.data[i].friendName,
-               chatId: friends.data[i].chatId
-            }
-            let status;
-            let active = 'offline';
-            if(friends.data[i].status === 'online'){
-                status = 'online';
-                active = 'online';
-            }else if(friends.data[i].status !== 'New User'){
-                status = timeSince(new Date(friends.data[i].status)); 
-            }else {
-              status = friends.data[i].status;
-            }
-
-            let chatCountVisibility = '';
-            if(friends.data[i].unReadChatCount) chatCountVisibility = 'visible';
-
-             list = list+`<li class="clearfix fri-list">
-                              <img src=${friends.data[i].profileUrl} alt="avatar">
-                              <div class="about">
-                                 <div class="name">${friends.data[i].friendName}</div>
-                                 <div class="status"> <i class="fa fa-circle ${active}"></i> ${status} </div>                                            
-                              </div>
-                              <div class = 'unchecked-mess-box ${chatCountVisibility}' id = '${friends.data[i].friendName}'> 
-                                  <p>${friends.data[i].unReadChatCount}</p> 
-                              </div>
-                          </li>`;
-        }
-        peopleList.innerHTML = list;
-    }else if(!friends.hasFriends){
-      no_friends_popup.style.display = 'flex';
-    }
+ 
+    //calling function to initialize friends
+    iitializeFriends();
 
     peopleList.addEventListener('click',async (e) => {
       removeAllChildren(message_container);
@@ -137,68 +97,71 @@ import '/chat_app1.js';
        if(message_send_box.style.visibility != 'visible') message_send_box.style.visibility = 'visible';
        no_chat_popup.style.display = 'none';
        friend_continer.classList.add('active');
+      
+         loadLoadingPopup();
+         currentChatRequestId = Math.round(1+Math.random()*100000);
+         let result = await fetch('/chat/get_chats',{
+             method:'post',
+             headers:{
+                'Content-Type':'application/json'
+             },
+             body:JSON.stringify({chatId:chatIdObj[selectedFriendIndex].chatId,
+                  friend:chatIdObj[selectedFriendIndex].friend,
+                  requestId:currentChatRequestId
+            })
+         })
+         
+         result = await result.json();
 
-       loadLoadingPopup();
-       let result = await fetch('/chat/get_chats',{
-           method:'post',
-           headers:{
-              'Content-Type':'application/json'
-           },
-           body:JSON.stringify({chatId:chatIdObj[selectedFriendIndex].chatId,
-                friend:chatIdObj[selectedFriendIndex].friend
-          })
-       })
- 
-       result = await result.json();
-       // desabling chat count
-       document.getElementById(chatIdObj[selectedFriendIndex].friend).style.display = 'none';
-       document.getElementById(chatIdObj[selectedFriendIndex].friend).innerHTML = '<p>0</p>'
-       if(result.chats){
-           console.log(result);
-           let chatCountIndex = result.chatData.length - result.chatCount;
-          let message = '';
-           for(let i = 0;i < result.chatData.length;i++){
-             let chat = result.chatData[i];
-             let time,d,date;
-                if(chatCountIndex === i){
-                  message = message + `<li id = 'unread-chat-count'>
-                                            unread messages
+         if(result.requestId === currentChatRequestId){
+            // desabling chat count
+            document.getElementById(chatIdObj[selectedFriendIndex].friend).style.display = 'none';
+            document.getElementById(chatIdObj[selectedFriendIndex].friend).innerHTML = '<p>0</p>';
+            if(result.chats){
+              loading_box.style.display = 'none';
+               console.log(result);
+               let chatCountIndex = result.chatData.length - result.chatCount;
+              let message = '';
+               for(let i = 0;i < result.chatData.length;i++){
+                 let chat = result.chatData[i];
+                 let time,d,date;
+                    if(chatCountIndex === i){
+                      message = message + `<li id = 'unread-chat-count'>
+                                                unread messages
+                                           </li>`;
+                    }
+                    if(result.owner === chat.user){
+                          d = new Date(chat.timeStamp);
+                          time = formatAMPM(d);
+                          date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+                          message = message + `<li class="clearfix">
+                                            <div class="message-data text-right">
+                                                 <span class="message-data-time">${time}, ${date}</span>
+                                            </div>
+                                            <div class="message other-message float-right"> 
+                                            ${chat.message}
+                                            </div>
                                        </li>`;
-                }
-                if(result.owner === chat.user){
+                    }else {
                       d = new Date(chat.timeStamp);
                       time = formatAMPM(d);
-                      date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+                      date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`;
+    
                       message = message + `<li class="clearfix">
-                                        <div class="message-data text-right">
-                                             <span class="message-data-time">${time}, ${date}</span>
-                                        </div>
-                                        <div class="message other-message float-right"> 
-                                        ${chat.message}
-                                        </div>
-                                   </li>`;
-                }else {
-                  d = new Date(chat.timeStamp);
-                  time = formatAMPM(d);
-                  date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`;
-
-                  message = message + `<li class="clearfix">
-                                 <div class="message-data">
-                                     <span class="message-data-time">${time}, ${date}</span>
-                                 </div>
-                                 <div class="message my-message">${chat.message}</div>                                    
-                             </li>                               `
-              }
+                                     <div class="message-data">
+                                         <span class="message-data-time">${time}, ${date}</span>
+                                     </div>
+                                     <div class="message my-message">${chat.message}</div>                                    
+                                 </li>                               `
+                  }
+                }
+                message_container.insertAdjacentHTML('beforeend',message);
+              
             }
-            message_container.insertAdjacentHTML('beforeend',message);
-          
+            //  send_mess_input_field.addEventListener('click',sendMessage);
+            send_mess_input_field.addEventListener('keypress',sendMessage)
+         }
        }
-       }  
-
-
-      //  send_mess_input_field.addEventListener('click',sendMessage);
-      send_mess_input_field.addEventListener('keypress',sendMessage)
-      
     });
 
 
@@ -226,90 +189,6 @@ import '/chat_app1.js';
     });
 
 
-    function timeSince(date) {
-          
-        var seconds = Math.floor((new Date() - date) / 1000);
-        var interval = seconds / 31536000;
-      
-        let finalTime;
-        if (interval > 1) {
-          finalTime = Math.floor(interval);
-          return finalTime === 1 ? `${finalTime} year ago`:`${finalTime} years ago`;
-        }
-        interval = seconds / 2592000;
-        if (interval > 1) {
-          finalTime = Math.floor(interval);
-          return finalTime === 1 ? `${finalTime} month ago`:`${finalTime} months ago`;
-        }
-        interval = seconds / 86400;
-        if (interval > 1) {
-          finalTime = Math.floor(interval);
-          return finalTime === 1 ? `${finalTime} day ago`:`${finalTime} days ago`;
-
-        }
-        interval = seconds / 3600;
-        if (interval > 1) {
-          finalTime = Math.floor(interval);
-          return finalTime === 1 ? `${finalTime} hour ago`:`${finalTime} hours ago`;
-        }
-        interval = seconds / 60;
-        if (interval > 1) {
-          finalTime = Math.floor(interval);
-          return finalTime === 1 ? `${finalTime} minute ago`:`${finalTime} minutes ago`;
-        }
-        return seconds === 1 ? `${seconds} second ago`:`${seconds} seconds ago`;
-      }
-
-
-    function sendMessage(e) {
-      let input = send_mess_input_field.value.trim();
-       if(e.key === 'Enter'){
-         let d = new Date();
-          let time = formatAMPM(d);
-          let date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
-         let message = `<li class="clearfix">
-                             <div class="message-data text-right">
-                                  <span class="message-data-time">${time}, ${date}</span>
-                             </div>
-                             <div class="message other-message float-right"> 
-                                 ${input}
-                             </div>
-                        </li>`;
-
-          message_container.insertAdjacentHTML('beforeend',message);
-          console.log(message_container.scrollHeight);
-          console.log(message_container.scrollTop);
-          console.log(message_container.s);
-          message_container.scrollTop = message_container.scrollHeight;
-          // now sending message to user
-          send_mess_input_field.value = '';
-          if(chatIdObj[selectedFriendIndex]){
-            let messageBox = {
-              friendName:selectedFriendName,
-              chatId:chatIdObj[selectedFriendIndex].chatId,
-              message:input.trim(),
-              timeStamp:d
-            }
-            console.log(messageBox);
-            socket.emit('send-message',messageBox)
-          }
-
-       }
-    }  
-
-
-    function formatAMPM(date) {
-      var hours = date.getHours();
-      var minutes = date.getMinutes();
-      var ampm = hours >= 12 ? 'pm' : 'am';
-      hours = hours % 12;
-      hours = hours ? hours : 12; // the hour '0' should be '12'
-      minutes = minutes < 10 ? '0'+minutes : minutes;
-      var strTime = hours + ':' + minutes + ' ' + ampm;
-      return strTime;
-    }
-
-
     socket.on('receive-message',(message,timestamp) => {
       let d = new Date(timestamp);
       let time = formatAMPM(d);
@@ -330,6 +209,7 @@ import '/chat_app1.js';
     })
 
     socket.on('update-users-status',(fri_name,timeStamp) => {
+      console.log(timeStamp);
         let element = document.getElementById(fri_name);
         element = element.previousElementSibling;
         element.children[1].classList.toggle('offline');
@@ -370,20 +250,153 @@ import '/chat_app1.js';
                chatId: dataObj.chatId
            }
     })
-    function removeAllChildren(parent){
-         while(parent.firstChild){
-            parent.removeChild(parent.firstChild);
-         }
 
-        //  console.log(parent)
+function removeAllChildren(parent){
+  while(parent.firstChild){
+     parent.removeChild(parent.firstChild);
+  }
+
+ //  console.log(parent)
+}
+
+function loadLoadingPopup() {
+ if(getComputedStyle(no_chat_popup).display == 'block'){
+   no_chat_popup.style.display = 'none';
+ }
+ loading_box.style.display = 'flex'
+}
+
+function timeSince(date) {
+        
+  var seconds = Math.floor((new Date() - date) / 1000);
+  var interval = seconds / 31536000;
+
+  let finalTime;
+  if (interval > 1) {
+    finalTime = Math.floor(interval);
+    return finalTime === 1 ? `${finalTime} year ago`:`${finalTime} years ago`;
+  }
+  interval = seconds / 2592000;
+  if (interval > 1) {
+    finalTime = Math.floor(interval);
+    return finalTime === 1 ? `${finalTime} month ago`:`${finalTime} months ago`;
+  }
+  interval = seconds / 86400;
+  if (interval > 1) {
+    finalTime = Math.floor(interval);
+    return finalTime === 1 ? `${finalTime} day ago`:`${finalTime} days ago`;
+
+  }
+  interval = seconds / 3600;
+  if (interval > 1) {
+    finalTime = Math.floor(interval);
+    return finalTime === 1 ? `${finalTime} hour ago`:`${finalTime} hours ago`;
+  }
+  interval = seconds / 60;
+  if (interval > 1) {
+    finalTime = Math.floor(interval);
+    return finalTime === 1 ? `${finalTime} minute ago`:`${finalTime} minutes ago`;
+  }
+  console.log(seconds);
+  return seconds === 1 ? `${seconds} second ago`:`${seconds} seconds ago`;
+}
+
+
+function sendMessage(e) {
+let input = send_mess_input_field.value.trim();
+ if(e.key === 'Enter'){
+   let d = new Date();
+    let time = formatAMPM(d);
+    let date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+   let message = `<li class="clearfix">
+                       <div class="message-data text-right">
+                            <span class="message-data-time">${time}, ${date}</span>
+                       </div>
+                       <div class="message other-message float-right"> 
+                           ${input}
+                       </div>
+                  </li>`;
+
+    message_container.insertAdjacentHTML('beforeend',message);
+    console.log(message_container.scrollHeight);
+    console.log(message_container.scrollTop);
+    console.log(message_container.s);
+    message_container.scrollTop = message_container.scrollHeight;
+    // now sending message to user
+    send_mess_input_field.value = '';
+    if(chatIdObj[selectedFriendIndex]){
+      let messageBox = {
+        friendName:selectedFriendName,
+        chatId:chatIdObj[selectedFriendIndex].chatId,
+        message:input.trim(),
+        timeStamp:d
+      }
+      console.log(messageBox);
+      socket.emit('send-message',messageBox)
     }
 
-    function loadLoadingPopup() {
-        if(getComputedStyle(no_chat_popup).display = 'block'){
-          no_chat_popup.style.display = 'none';
-        }
-        loading_box.style.display = 'flex'
+ }
+}  
+
+
+function formatAMPM(date) {
+var hours = date.getHours();
+var minutes = date.getMinutes();
+var ampm = hours >= 12 ? 'pm' : 'am';
+hours = hours % 12;
+hours = hours ? hours : 12; // the hour '0' should be '12'
+minutes = minutes < 10 ? '0'+minutes : minutes;
+var strTime = hours + ':' + minutes + ' ' + ampm;
+return strTime;
+}
+
+
+async function iitializeFriends() {
+  let friends = await fetch("/chat/get_friends", {
+    method: "get",
+  });
+
+  friends = await friends.json();
+  console.log(friends);
+  if (friends.hasFriends) {
+    let list = "";
+    for (let i = 0; i < friends.data.length; i++) {
+      chatIdObj[i] = {
+        friend: friends.data[i].friendName,
+        chatId: friends.data[i].chatId,
+      };
+      let status;
+      let active = "offline";
+      if (friends.data[i].status === "online") {
+        status = "online";
+        active = "online";
+      } else if (friends.data[i].status !== "New User") {
+        status = timeSince(new Date(friends.data[i].status));
+      } else {
+        status = friends.data[i].status;
+      }
+
+      let chatCountVisibility = "";
+      if (friends.data[i].unReadChatCount) chatCountVisibility = "visible";
+
+      list =
+        list +
+        `<li class="clearfix fri-list">
+                          <img src=${friends.data[i].profileUrl} alt="avatar">
+                          <div class="about">
+                             <div class="name">${friends.data[i].friendName}</div>
+                             <div class="status"> <i class="fa fa-circle ${active}"></i> ${status} </div>                                            
+                          </div>
+                          <div class = 'unchecked-mess-box ${chatCountVisibility}' id = '${friends.data[i].friendName}'> 
+                              <p>${friends.data[i].unReadChatCount}</p> 
+                          </div>
+                      </li>`;
     }
+    peopleList.innerHTML = list;
+  } else if (!friends.hasFriends) {
+    no_friends_popup.style.display = "flex";
+  }
+}
 
 
 })();
