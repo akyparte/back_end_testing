@@ -157,6 +157,8 @@ import '/chat_app1.js';
                 }
                 message_container.insertAdjacentHTML('beforeend',message);
               
+            }else {
+              loading_box.style.display = 'none';
             }
             //  send_mess_input_field.addEventListener('click',sendMessage);
             send_mess_input_field.addEventListener('keypress',sendMessage)

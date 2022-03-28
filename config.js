@@ -1,7 +1,7 @@
 module.exports = {
     username:'root',
     password:'12345678',
-    database:'application',
+    database:'chat_application',
     host:'localhost',
     dialect:'mysql',
     JWTKEY:'kjcnjakcscjhjh',

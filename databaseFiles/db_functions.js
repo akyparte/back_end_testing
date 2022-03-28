@@ -417,8 +417,8 @@ class Queries {
               chatCount:0
           },{
               where:{
-                  username:username,
-                  friend:friend
+                  username:friend,
+                  friend:username
               }
           });
 
@@ -435,8 +435,8 @@ class Queries {
        }
             let result = await UnreadChatCount.findOne({
                 where:{
-                    username:username,
-                    friend:friend
+                    username:friend,
+                    friend:username
                 }
             });
             if(result){

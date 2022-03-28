@@ -43,6 +43,7 @@ class socketHandling {
                         }
                     }
                     await socketHandling.userDisconnectedSaveChats(userToken.username);
+                    await socketHandling.userDisconnectedSaveUnreadChatCount(userToken.username);
                   }
               });
  
@@ -76,6 +77,7 @@ class socketHandling {
                         }
                     }else {
                         await socketHandling.manageChats(m,userToken.username);
+                        await socketHandling.manageUnreadChats(userToken.username,m.friendName);
                     }
 
                    //later i have to write code for managing user chat history
@@ -178,7 +180,21 @@ class socketHandling {
               }
          }
     }
+   
+    static async userDisconnectedSaveUnreadChatCount(username){
 
+        let friends = await objDbFunctions.getUserFriends(username);
+
+        for(let i = 0;i < friends.length;i++){
+            let friend = friends[i].dataValues.friend;
+            if(unReadChatCount[username] && unReadChatCount[username][friend]){
+                await objDbFunctions.saveChatCount(username,friend,unReadChatCount[username][friend]);
+                unReadChatCount[username][friend] = 0;
+           }
+
+        }
+        console.log('chat count is saved into database');
+    }
 
     static getSocketToRoutes(){ return socketHolder; }
 }
