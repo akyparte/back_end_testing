@@ -67,7 +67,6 @@
               let result = await fetch('/search/addFriend');
 
               result = await result.json();
-              console.log(result);
               if(result.friendAdded){
                 let status;
                 let active = 'offline';

@@ -332,7 +332,11 @@ class Queries {
                           chatId:chatId
                      }]);
                    if(result.length){
-                       finalResult.newFriend = {fri_name:friendName,pro:profileUrl,chatId:chatId}
+                       finalResult.newFriend = {
+                           fri_name:friendName,
+                           pro:profileUrl,
+                           chatId:chatId
+                       };
                       finalResult.friendAdded = true;
                          // because we want time stamp of friend not that actice user
                          // because if user is online no need to look for timestamp
@@ -400,11 +404,15 @@ class Queries {
     }
 
     async createUserForChatCount(username,friend){
-          let created = await UnreadChatCount.create({
+          let created = await UnreadChatCount.bulkCreate([{
               username:username,
               friend:friend,
               chatCount:0
-          });
+          },{
+              username:friend,
+              friend:username,
+              chatCount:0  
+          }]);
           if(created){
               return true;
           }else {

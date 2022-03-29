@@ -33,7 +33,8 @@ let Users = sequelize.define('Users',{
     //     allowNull:false
     // },
     profileUrl:{
-        type:DataTypes.STRING(100)
+        type:DataTypes.STRING(100),
+        defaultValue:'default_profile.png'
     }
 },{
     indexes:[
