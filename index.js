@@ -34,7 +34,7 @@ app.get('/', objTokenValidation.varifyToken,(req, res) => {
 
 app.use('/',login_system_route);
 
-app.use('/forgot_password',objTokenValidation.isTokenExisted,forgot_route);
+app.use('/forgot_password',forgot_route);
 
 app.use('/chat',objTokenValidation.isTokenExisted,chat_router);
 

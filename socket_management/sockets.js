@@ -71,7 +71,7 @@ class socketHandling {
                             }else {
                                 // send message count to client
                                 io.to(socketUsers[m.friendName]).emit('unread-message-count',userToken.username,m.timeStamp);
-                                await socketHandling.manageUnreadChats(m.friendName,userToken.username)
+                                await socketHandling.manageUnreadChats(userToken.username,m.friendName)
                                 await socketHandling.manageChats(m,userToken.username);
                             }
                         }
@@ -149,19 +149,19 @@ class socketHandling {
         // means here in friend's website our user is his friend so now we are keeping track of our user's chat
         // count in friends website
 
-        if(unReadChatCount[username]){
-             if(unReadChatCount[username][friend]){
-                unReadChatCount[username][friend] = unReadChatCount[username][friend] + 1;
-                if(unReadChatCount[username][friend] >= 10){
-                      await objDbFunctions.saveChatCount(username,friend,unReadChatCount[username][friend]);
-                      unReadChatCount[username][friend] = 0;
+        if(unReadChatCount[friend]){
+             if(unReadChatCount[friend][username]){
+                unReadChatCount[friend][username] = unReadChatCount[friend][username] + 1;
+                if(unReadChatCount[friend][username] >= 10){
+                      await objDbFunctions.saveChatCount(friend,username,unReadChatCount[friend][username]);
+                      unReadChatCount[friend][username] = 0;
                 }
              }else {
-                unReadChatCount[username][friend] = 1;
+                unReadChatCount[friend][username] = 1;
              }
         }else {
-            unReadChatCount[username] = {
-                [friend]:1
+            unReadChatCount[friend] = {
+                [username]:1
             }
         }
     }
@@ -182,7 +182,7 @@ class socketHandling {
     }
    
     static async userDisconnectedSaveUnreadChatCount(username){
-
+         console.log(unReadChatCount);
         let friends = await objDbFunctions.getUserFriends(username);
 
         for(let i = 0;i < friends.length;i++){

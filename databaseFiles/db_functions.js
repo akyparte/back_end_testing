@@ -4,6 +4,7 @@ const {Users,TempEmailStore,Friends,UserTimeStamp,Chats,UnreadChatCount,Sequeliz
 const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
 let unReadChatCount = require('../unReadChats/unreadChatsCount');
+const timespan = require('jsonwebtoken/lib/timespan');
 
 class Queries {
   
@@ -271,20 +272,28 @@ class Queries {
 
     }
 
-    async getUserWithProfile(username){
+    async getUserWithProfileAndStatus(username){
         // this function finds user and returns his name and profile
         // because in front-end when user search for a friend, request comes here
 
-
+        
         let user = await Users.findOne({
-           where:{username:username}
+            where:{username:username}
         })
         if(user){
-           return {
-                 username:user.dataValues.username,
-                 profileUrl:user.dataValues.profileUrl,
-                 userExists:true
-                  }
+            let userTimeStamp = await this.getUsersTimeStamp(username);
+            let userObj = {
+                    username:user.dataValues.username,
+                    profileUrl:user.dataValues.profileUrl,
+                    userExists:true,
+            };
+
+            if(!userTimeStamp.notUsedEvenOnce){
+                userObj.timeStamp = userTimeStamp.result;
+            }else {
+                userObj.timeStamp = 'New User';
+            }
+            return userObj;
         }else {
             return {userExists:false}
         }
@@ -303,7 +312,7 @@ class Queries {
           }
     }  
       
-    async saveNewFriend(username,friendName,profileUrl,needForTimeStamp){
+    async saveNewFriend(username,friendName,profileUrl,needUsersInfo){
       
         // now need to get user's info because we have to add this user in his friend's list
         let userNameToAddInFriendTable;
@@ -332,29 +341,19 @@ class Queries {
                           chatId:chatId
                      }]);
                    if(result.length){
-                       finalResult.newFriend = {
-                           fri_name:friendName,
-                           pro:profileUrl,
-                           chatId:chatId
-                       };
-                      finalResult.friendAdded = true;
-                         // because we want time stamp of friend not that actice user
-                         // because if user is online no need to look for timestamp
-                         if(needForTimeStamp){
-                             let friendtimeStamp = await UserTimeStamp.findOne({
-                                 where:{username:friendName}
-                             })
-                             if(friendtimeStamp){
-                                finalResult.timeStamp = friendtimeStamp.dataValues.status;
-                                return finalResult;
-                             }else {
-                                // means user exist but never used chatting website 
-                                // so return new user
-                                finalResult.timeStamp = 'New User';
-                                 return finalResult;
-                             }
-                         }
-                         return finalResult;
+                       
+                    if(needUsersInfo){
+                        finalResult.usersData = {
+                            user:userNameToAddInFriendTable,
+                            pro:userProfileSrcToAddInFriendTable,
+                            chatId:chatId
+                        };
+                    }else {
+                        finalResult.chatId = chatId;
+                    }
+                    finalResult.friendAdded = true;
+
+                    return finalResult;
 
                     }else {
                       finalResult.friendAdded = false;
@@ -395,7 +394,7 @@ class Queries {
                  }
              });
 
-             if(updated){
+             if(updated[0]){
                  return true;
              }else {
                  return false;
@@ -425,8 +424,8 @@ class Queries {
               chatCount:0
           },{
               where:{
-                  username:friend,
-                  friend:username
+                  username:username,
+                  friend:friend
               }
           });
 
@@ -438,13 +437,16 @@ class Queries {
 
     async getUnreadChatCount(username,friend){
         let chatCount = 0;
+        // if(unReadChatCount[username] && unReadChatCount[username][friend]){
+        //     chatCount = unReadChatCount[username][friend];
+        // }
         if(unReadChatCount[username] && unReadChatCount[username][friend]){
             chatCount = unReadChatCount[username][friend];
-       }
+        }
             let result = await UnreadChatCount.findOne({
                 where:{
-                    username:friend,
-                    friend:username
+                    username:username,
+                    friend:friend
                 }
             });
             if(result){
