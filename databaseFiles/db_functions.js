@@ -36,7 +36,11 @@ class Queries {
             where:{username:username}
         });
         if(user){
-
+            if(user.dataValues.ISLOGGEDIN){
+                return {
+                    alreadyLoggedIn:true
+                }
+            }
             let valid = await bcrypt.compare(password,user.password);
             return {
                 validUser:valid,
@@ -456,7 +460,17 @@ class Queries {
             }
     }
     
-
+    async makeUserLoggedIIN(username){
+         
+        let result = await Users.update({
+            ISLOGGEDIN:1
+        },
+        {
+            where:{username:username}
+        });
+        if(result[0]) return true;
+        else return false;
+    }
 }
 
 module.exports = Queries;

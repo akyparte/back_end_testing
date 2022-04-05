@@ -10,19 +10,29 @@ const jwt = require('jsonwebtoken');
 router.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
     let username = req.body.username;
     let password = req.body.password;
+    
     if(username&&password){
+      //  let loginStatus = await objDbFunctions.isLoggedIn(username);
+      //  if(loginStatus){
+      //     res.json({response:'alreadyLoggedIn'});
+      //     return;
+      //  }
         let result = await objDbFunctions.isRegisteredUser(username,password);
-        if(result.validUser){
-          let payload = {
-            username:username,
-            // date:Date.now(),
-            // id:result.user.uniqueID
-          }
-          let token = jwt.sign(payload,config.JWTKEY);
-          res.cookie('jwt',token);
-          res.json({ response:'authenticated' });
+        if(result.alreadyLoggedIn){
+           res.json({response:'alreadyLoggedIn'});
+           return;
+        }else if(result.validUser){
+            await objDbFunctions.makeUserLoggedIIN(username);  
+            let payload = {
+               username:username,
+               // date:Date.now(),
+               // id:result.user.uniqueID
+            }
+            let token = jwt.sign(payload,config.JWTKEY);
+            res.cookie('jwt',token);
+            res.json({ response:'authenticated' });
         }else {
-          res.json({ response:'unauthenticated' });
+            res.json({ response:'unauthenticated' });
         }
     }
 });

@@ -35,6 +35,10 @@ let Users = sequelize.define('Users',{
     profileUrl:{
         type:DataTypes.STRING(100),
         defaultValue:'default_profile.png'
+    },
+    ISLOGGEDIN:{
+        type:DataTypes.INTEGER(1),
+        defaultValue:0
     }
 },{
     indexes:[

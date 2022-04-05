@@ -37,6 +37,11 @@ login_btn.addEventListener('click',async () => {
 		//    password.setCustomValidity("Invalid password");
 		   username.reportValidity();
 		//    password.reportValidity();
+		}else if(result.response === 'alreadyLoggedIn'){
+			username.setCustomValidity("Already Logged In");
+		 //    password.setCustomValidity("Invalid password");
+			username.reportValidity();
+		 //    password.reportValidity();
 		}
 	
 	}else {
