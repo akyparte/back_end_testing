@@ -120,6 +120,17 @@ router.post('/get_chats',async(req,res) => {
     }
     await objDbFunctions.resetChatCount(userInfo.username,req.body.friend);
 
+});
+
+
+router.post('/chatHistory',async (req,res) => {
+      var userInfo = jwt.decode(req.cookies.jwt);
+      let result = await objDbFunctions.getChatHistory(req.body.chatId,req.body.chatLength);
+      if(result.chatsRemaining){
+           res.json({chatsRemaining:true,chats:result.result});
+      }else {
+        res.json({chatsRemaining:false,chats:result.result});
+      }
 })
 
 

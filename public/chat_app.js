@@ -1,6 +1,9 @@
+import { json } from 'express/lib/response';
 import '/chat_app1.js';
 (async function () {
     let currentChatRequestId = 0;
+    let chatHistoryRequestId = 'None';
+    let isChatDataAvailableForCurrentUser = true;
     let socket = io();
     let chatIdObj = {};
     let selectedFriendName;
@@ -29,6 +32,7 @@ import '/chat_app1.js';
     iitializeFriends();
 
     peopleList.addEventListener('click',async (e) => {
+      isChatDataAvailableForCurrentUser = true;
       removeAllChildren(message_container);
       let friendName;
       let profileUrl;
@@ -195,6 +199,32 @@ import '/chat_app1.js';
       }
     });
 
+    message_container.addEventListener('scroll',async (e) => {
+      let chatLength = message_container.children.length;
+      if(e.target.scrollTop === 0){
+          if(chatHistoryRequestId === 'None' && isChatDataAvailableForCurrentUser === true){
+              chatHistoryRequestId = 'pending';
+
+              let chatId = chatIdObj[selectedFriendIndex].chatId;
+               let result = await fetch('/chat/chatHistory',{
+                   method:'post',
+                   headers:{'Content-Type':'application/json'},
+                   body:JSON.stringify({chatLength:chatLength,chatId:chatId})
+               });
+
+               result = await result.json();
+               if(result.chatsRemaning){
+                    // now just append chats to message container 
+                    // while appending chats needs to show loading popup
+                chatHistoryRequestId = 'None';
+               }else {
+                isChatDataAvailableForCurrentUser = false;
+               }
+
+
+          }
+      }
+  });
 
     socket.on('receive-message',(message,timestamp) => {
       let d = new Date(timestamp);

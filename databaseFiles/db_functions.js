@@ -276,6 +276,37 @@ class Queries {
 
     }
 
+    async getChatHistory(chatId,chatCount){
+        let totalChatCount = await Chats.count({
+            where:{
+                chatId:chatId
+            }
+        });
+        if(totalChatCount === 0){
+            return {chatsRemaining:false}
+        }else if(totalChatCount === chatCount){
+            return {chatsRemaining:false}
+        }else if(totalChatCount < 6){
+            let chats = await Chats.findAll({
+                where:{chatId:chatId},
+            });
+            chats = chats.map(obj => obj.dataValues);
+            return {result:chats,chatsRemaining:true}
+        }else if(totalChatCount > chatCount){
+            let limit = 6;
+            // if(unreadChatCount>= 6){
+            //      limit = unreadChatCount;
+            // }else limit = 6;
+
+            let chats = await Chats.findAll({
+                where:{chatId:chatId},
+                offset:totalChatCount-limit
+            });
+
+            chats = chats.map(obj => obj.dataValues);
+            return {result:chats,chatsRemaining:true}
+        }
+    }
     async getUserWithProfileAndStatus(username){
         // this function finds user and returns his name and profile
         // because in front-end when user search for a friend, request comes here
@@ -470,6 +501,18 @@ class Queries {
         });
         if(result[0]) return true;
         else return false;
+    }
+
+
+    async getRemainingChats(chatId,chatLength){
+          
+        let result = Chats.findAll({
+            where:{chatId:chatId}
+        });
+
+        if(result){
+            
+        }
     }
 }
 
