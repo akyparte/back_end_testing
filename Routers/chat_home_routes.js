@@ -125,9 +125,10 @@ router.post('/get_chats',async(req,res) => {
 
 router.post('/chatHistory',async (req,res) => {
       var userInfo = jwt.decode(req.cookies.jwt);
+      chatsArray;
       let result = await objDbFunctions.getChatHistory(req.body.chatId,req.body.chatLength);
       if(result.chatsRemaining){
-           res.json({chatsRemaining:true,chats:result.result});
+           res.json({chatsRemaining:true,chats:result.result,owner:userInfo.username});
       }else {
         res.json({chatsRemaining:false,chats:result.result});
       }

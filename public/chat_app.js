@@ -1,5 +1,5 @@
-import { json } from 'express/lib/response';
-import '/chat_app1.js';
+// import { json } from 'express/lib/response';
+// import '/chat_app1.js';
 (async function () {
     let currentChatRequestId = 0;
     let chatHistoryRequestId = 'None';
@@ -26,14 +26,14 @@ import '/chat_app1.js';
     let search_status_bar = document.getElementById('search_status_bar');
     let loading_box = document.getElementById('loading-box');
     let search_user_btn = document.getElementById('search_user_btn');
-
+    let filter_friends_search = document.getElementById('filter-friends-search');
  
     //calling function to initialize friends
-    iitializeFriends();
+    // iitializeFriends();
 
     peopleList.addEventListener('click',async (e) => {
       isChatDataAvailableForCurrentUser = true;
-      removeAllChildren(message_container);
+      // removeAllChildren(message_container);
       let friendName;
       let profileUrl;
       let status;
@@ -46,28 +46,32 @@ import '/chat_app1.js';
           status = e.target.children[1].children[1].innerText.trim();
           friend_continer = e.target;
       //  console.log(friend_continer);
-
+      removeAllChildren(message_container);
        }else if(e.target.nodeName === 'IMG'){
            friendName = e.target.nextElementSibling.children[0].innerText.trim();
            profileUrl = e.target.src;
            status = e.target.nextElementSibling.children[1].innerText.trim();
            friend_continer = e.target.parentNode;
+           removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'about'){
            friendName = e.target.children[0].innerText.trim();
            status = e.target.chilldren[1].innerText.trim();
            profileUrl = e.target.previousElementSibling.src;
            friend_continer = e.target.parentNode;
+           removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'name'){
            friendName = e.target.innerText.trim();
            profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.nextElementSibling.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
+           removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'status'){
          console.log(e.target.previousElementSibling);
            friendName = e.target.previousElementSibling.innerText.trim();
            profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
+           removeAllChildren(message_container);
        }
 
       //  console.log(friend_continer);
@@ -104,7 +108,7 @@ import '/chat_app1.js';
        friend_continer.classList.add('active');
       
          loadLoadingPopup();
-         console.log(chatIdObj);
+        //  console.log(chatIdObj);
          currentChatRequestId = Math.round(1+Math.random()*100000);
          let result = await fetch('/chat/get_chats',{
              method:'post',
@@ -121,7 +125,7 @@ import '/chat_app1.js';
 
          if(result.requestId === currentChatRequestId){
             // desabling chat count
-            console.log(chatIdObj);
+            // console.log(chatIdObj);
             console.log(selectedFriendIndex);
             document.getElementById(chatIdObj[selectedFriendIndex].friend).style.display = 'none';
             document.getElementById(chatIdObj[selectedFriendIndex].friend).innerHTML = '<p>0</p>';
@@ -204,7 +208,7 @@ import '/chat_app1.js';
       if(e.target.scrollTop === 0){
           if(chatHistoryRequestId === 'None' && isChatDataAvailableForCurrentUser === true){
               chatHistoryRequestId = 'pending';
-
+              loadLoadingPopup();
               let chatId = chatIdObj[selectedFriendIndex].chatId;
                let result = await fetch('/chat/chatHistory',{
                    method:'post',
@@ -213,12 +217,46 @@ import '/chat_app1.js';
                });
 
                result = await result.json();
-               if(result.chatsRemaning){
+               if(result.chatsRemaining){
+                loading_box.style.display = 'none';
+                let chatsArr = result.chats;
+                console.log(chatsArr);
                     // now just append chats to message container 
                     // while appending chats needs to show loading popup
+                    let message = '';
+               for(let i = 0;i < chatsArr.length;i++){
+                 let chat = chatsArr[i];
+                 let time,d,date;
+                    if(result.owner === chat.user){
+                          d = new Date(chat.timeStamp);
+                          time = formatAMPM(d);
+                          date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`
+                          message = message + `<li class="clearfix">
+                                            <div class="message-data text-right">
+                                                 <span class="message-data-time">${time}, ${date}</span>
+                                            </div>
+                                            <div class="message other-message float-right"> 
+                                            ${chat.message}
+                                            </div>
+                                       </li>`;
+                    }else {
+                      d = new Date(chat.timeStamp);
+                      time = formatAMPM(d);
+                      date = `${d.getDate()}/${d.getMonth()}/${d.getFullYear()}`;
+    
+                      message = message + `<li class="clearfix">
+                                     <div class="message-data">
+                                         <span class="message-data-time">${time}, ${date}</span>
+                                     </div>
+                                     <div class="message my-message">${chat.message}</div>                                    
+                                 </li>                               `
+                  }
+                }
+                message_container.insertAdjacentHTML('afterbegin',message);
                 chatHistoryRequestId = 'None';
                }else {
                 isChatDataAvailableForCurrentUser = false;
+                loading_box.style.display = 'none';
                }
 
 
@@ -226,6 +264,7 @@ import '/chat_app1.js';
       }
   });
 
+  filter_friends_search.addEventListener('keyup',searchFilter);
     socket.on('receive-message',(message,timestamp) => {
       let d = new Date(timestamp);
       let time = formatAMPM(d);
@@ -236,7 +275,8 @@ import '/chat_app1.js';
                         </div>
                    <div class="message my-message">${message}</div>
                    </li> `;
-                   message_container.insertAdjacentHTML('beforeend',mess)       
+                   message_container.insertAdjacentHTML('beforeend',mess);
+                   message_container.scrollTop = message_container.scrollHeight;       
     })
 
     socket.on('unread-message-count',(fri_name) => {
@@ -287,7 +327,7 @@ import '/chat_app1.js';
                friend: dataObj.user,
                chatId: dataObj.chatId
            }
-           console.log(chatIdObj);
+          //  console.log(chatIdObj);
     })
 
 function removeAllChildren(parent){
@@ -302,7 +342,7 @@ function loadLoadingPopup() {
  if(getComputedStyle(no_chat_popup).display == 'block'){
    no_chat_popup.style.display = 'none';
  }
- loading_box.style.display = 'flex'
+ loading_box.style.display = 'flex';
 }
 
 function timeSince(date) {
@@ -434,6 +474,7 @@ async function iitializeFriends() {
                       </li>`;
     }
     peopleList.innerHTML = list;
+    // console.log(chatIdObj);
   } else if (!friends.hasFriends) {
     no_friends_popup.style.display = "flex";
   }
@@ -525,7 +566,7 @@ async function addFriend(e) {
               friend: result.friendName,
               chatId: result.chatId
           }
-          console.log(chatIdObj);
+          // console.log(chatIdObj);
             // now remove search popup
             // also remove noFriends popup , because if you are a new user you will have it 
             let noFriendsPopup = document.getElementById('no-friends');
@@ -546,6 +587,24 @@ async function addFriend(e) {
     
 }
 
+
+async function searchFilter(e) {
+    console.log('called')
+    if(e.key === 'Backspace'){
+        
+    }else {
+        let name = e.target.value.trim();
+        let length = Object.keys(chatIdObj);
+        console.log(length)
+        for(let i = 0;i < length.length;i++){
+            let friendObj = chatIdObj[i];
+            console.log(friendObj.friend);
+            if(!friendObj.friend.includes(name)){
+                peopleList.children[i].style.display = 'none';
+            }
+        }
+    }
+}
 // function timeSince(date) {
 
 //   var seconds = Math.floor((new Date() - date) / 1000);

@@ -5,6 +5,7 @@ const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
 let unReadChatCount = require('../unReadChats/unreadChatsCount');
 const timespan = require('jsonwebtoken/lib/timespan');
+let chatsArray = require('../chats/chats_array');
 
 class Queries {
   
@@ -277,6 +278,11 @@ class Queries {
     }
 
     async getChatHistory(chatId,chatCount){
+        let onlineChatLength = 0;
+        if(chatsArray[chatId]){
+            onlineChatLength = chatsArray[chatId].length;
+        }
+        // chatCount = chatCount - onlineChatLength;
         let totalChatCount = await Chats.count({
             where:{
                 chatId:chatId
@@ -284,7 +290,9 @@ class Queries {
         });
         if(totalChatCount === 0){
             return {chatsRemaining:false}
-        }else if(totalChatCount === chatCount){
+        }
+        totalChatCount = totalChatCount + onlineChatLength;
+        if(totalChatCount === chatCount){
             return {chatsRemaining:false}
         }else if(totalChatCount < 6){
             let chats = await Chats.findAll({
@@ -293,14 +301,21 @@ class Queries {
             chats = chats.map(obj => obj.dataValues);
             return {result:chats,chatsRemaining:true}
         }else if(totalChatCount > chatCount){
-            let limit = 6;
-            // if(unreadChatCount>= 6){
-            //      limit = unreadChatCount;
-            // }else limit = 6;
+           let offset = 0;
+           let limit = 6;
+             if((totalChatCount - chatCount) <= 6){
+               offset = 0;
+               limit = totalChatCount-chatCount;
+             }else {
+                 offset =  totalChatCount - (chatCount + 6);
+                 limit = 6;
+             }
 
-            let chats = await Chats.findAll({
-                where:{chatId:chatId},
-                offset:totalChatCount-limit
+
+             let chats = await Chats.findAll({
+                 where: {chatId:chatId},
+                 offset: offset,
+                 limit: limit
             });
 
             chats = chats.map(obj => obj.dataValues);

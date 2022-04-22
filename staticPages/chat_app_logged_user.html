@@ -33,7 +33,7 @@
                     <div class="input-group-prepend">
                         <span class="input-group-text"><i class="fa fa-search"></i></span>
                     </div>
-                    <input type="text" class="form-control" placeholder="Search...">
+                    <input type="text" class="form-control" placeholder="Search..." id ='filter-friends-search'>
                 </div>
                 <ul id = 'friends' class="list-unstyled chat-list mt-2 mb-0"  style="overflow-y: auto;height: 580px;">
                     <!-- <li class="clearfix">
@@ -50,6 +50,13 @@
                             <div class="status"> <i class="fa fa-circle online"></i> online </div>
                         </div>
                     </li> -->
+                    <li class="clearfix active">
+                        <!-- <img src="https://bootdey.com/img/Content/avatar/avatar2.png" alt="avatar"> -->
+                        <div class="about" id = 'no-results-found' style="display: flex;justify-content: center; align-items: center;">
+                            <div class="name" style="width: fit-content;">Aiden Chavez</div>
+                            <!-- <div class="status"> <i class="fa fa-circle online"></i> online </div> -->
+                        </div>
+                    </li>
                 </ul>
             </div>
             <div class="chat" id = 'chat-showing-box'>
