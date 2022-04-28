@@ -1,4 +1,7 @@
 // import { json } from 'express/lib/response';
+
+// const { get } = require("express/lib/request");
+
 // import '/chat_app1.js';
 (async function () {
     let currentChatRequestId = 0;
@@ -29,10 +32,12 @@
     let filter_friends_search = document.getElementById('filter-friends-search');
  
     //calling function to initialize friends
-    // iitializeFriends();
+    iitializeFriends();
 
     peopleList.addEventListener('click',async (e) => {
       isChatDataAvailableForCurrentUser = true;
+      chatHistoryRequestId = 'None';
+
       // removeAllChildren(message_container);
       let friendName;
       let profileUrl;
@@ -204,6 +209,8 @@
     });
 
     message_container.addEventListener('scroll',async (e) => {
+      console.log(chatHistoryRequestId);
+      console.log(isChatDataAvailableForCurrentUser);
       let chatLength = message_container.children.length;
       if(e.target.scrollTop === 0){
           if(chatHistoryRequestId === 'None' && isChatDataAvailableForCurrentUser === true){
@@ -478,6 +485,9 @@ async function iitializeFriends() {
   } else if (!friends.hasFriends) {
     no_friends_popup.style.display = "flex";
   }
+
+
+  // console.log(getComputedStyle(peopleList.children[0]).display);
 }
 
 
@@ -589,21 +599,84 @@ async function addFriend(e) {
 
 
 async function searchFilter(e) {
-    console.log('called')
-    if(e.key === 'Backspace'){
-        
-    }else {
-        let name = e.target.value.trim();
-        let length = Object.keys(chatIdObj);
-        console.log(length)
-        for(let i = 0;i < length.length;i++){
-            let friendObj = chatIdObj[i];
-            console.log(friendObj.friend);
-            if(!friendObj.friend.includes(name)){
-                peopleList.children[i].style.display = 'none';
+     let name = e.target.value.trim();
+     console.log('called')
+     if(e.key === 'Backspace'){
+       let hiddenUserCount = 0;
+         let noresultbox = document.getElementById('no-results-found');
+           if(noresultbox){
+              let LiToBeRemoved = noresultbox.parentNode;
+              let parent = noresultbox.parentNode.parentNode;
+              parent.removeChild(LiToBeRemoved);
+           }
+         for(let i = 0;i < peopleList.children.length;i++){
+          let friendObj = chatIdObj[i];
+          if(friendObj.friend.includes(name)){
+            if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
+              peopleList.children[i].style.display = 'list-item';
             }
+          }else {
+              peopleList.children[i].style.display = 'none';
+              hiddenUserCount++;
+          }
+         }
+         if(hiddenUserCount === peopleList.children.length){
+              addNoResultFoundBox();
+         }
+    }else {
+      let hiddenUserCount = 0;
+        let noresultbox = document.getElementById('no-results-found');
+        if(!noresultbox){
+           for(let i = 0;i < peopleList.children.length;i++){
+             let friendObj = chatIdObj[i];
+             console.log(friendObj.friend);
+             if(friendObj.friend.includes(name)){
+               if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
+                 peopleList.children[i].style.display = 'list-item';
+               }
+             }else {
+               console.log(getComputedStyle(peopleList.children[i]).display);
+              //  if(getComputedStyle(peopleList.children[i]).display !== 'none'){
+                 peopleList.children[i].style.display = 'none';
+                 hiddenUserCount++;
+              //  }
+             }
+         }
+         if(hiddenUserCount === peopleList.children.length){
+            addNoResultFoundBox();
+         }
         }
     }
+}
+
+function addNoResultFoundBox() {
+     let lastChild = peopleList.children.length > 0 ? peopleList.children[peopleList.children.length-1] : 0;
+    //  let lastChild = peopleList.children[peopleList.children.length-1];
+     let addBox = false;
+    if(peopleList.children.length === 0){
+        addBox = true;         
+    }else if(lastChild && lastChild.children[0].nodeName !== 'DIV' && lastChild.children[0].id !== 'no-results-found'){
+              addBox = true;
+    }
+
+    if(addBox){
+        //  if(lastChild.children[0].nodeName !== 'DIV' && lastChild.children[0].id !== 'no-results-found'){
+           let box = `  <li class="clearfix active">
+                             <div class="about" id = 'no-results-found'>
+                                   <div class="name" style="width: fit-content;">No results found !</div>
+                             </div>
+                        </li>`;
+             peopleList.insertAdjacentHTML('beforeend',box);  
+    // }
+}
+
+}
+
+
+function makeVisible(parent) {
+     for(let i = 0;i < parent.children.length;i++){
+      parent.children[i].display = 'list-item';
+     }
 }
 // function timeSince(date) {
 

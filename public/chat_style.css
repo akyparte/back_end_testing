@@ -369,7 +369,7 @@ div.visible {
     justify-content: center;
     border-radius: 50%;
     background: rgb(104, 104, 104);
-    background: linear-gradient(0deg,rgba(63,249,220,0.1)33%,rgb(204, 204, 204)100%);
+    background: linear-gradient(0deg,rgba(63,249,220,0.1),33%,rgb(204, 204, 204),100%);
     animation: spin .8s linear 0s infinite;
 }
 
@@ -468,3 +468,11 @@ body {
   }
 
   
+  #no-results-found {
+    display: flex;
+    justify-content: center; 
+    align-items: center;
+    padding: 0.6rem;
+    /* border: 1px solid black; */
+    width: 100%;
+  }
