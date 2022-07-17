@@ -11,6 +11,7 @@ let activeFriends = require('../usersActiveFriends/activeFriends');
 
 
 router.post('/getUserInfo',async (req,res) => {
+    if(req.cookies && req.cookies.jwt && req.body && req.body.username){
        let username = jwt.decode(req.cookies.jwt).username;
        let friendName = req.body.username;
 
@@ -31,49 +32,52 @@ router.post('/getUserInfo',async (req,res) => {
        }else {
             res.json({userExist:false})
         }
+    }
 })
 
 router.get('/addFriend',async (req,res) => {
-   let io = socket_route.getSocketToRoutes();
-   let friendInfo = jwt.decode(req.cookies.frd);
-   let friendName = friendInfo.friendName;
-   let FriendProfileUrl = friendInfo.profileUrl;
-   let friendsTimeStamp = friendInfo.timeStamp;
-   let username = jwt.decode(req.cookies.jwt).username;
+   if(req.cookies && req.cookies.frd){
 
-   if(onlineUsers[friendName]){
+      let io = socket_route.getSocketToRoutes();
+      let friendInfo = jwt.decode(req.cookies.frd);
+      let friendName = friendInfo.friendName;
+      let FriendProfileUrl = friendInfo.profileUrl;
+      let friendsTimeStamp = friendInfo.timeStamp;
+      let username = jwt.decode(req.cookies.jwt).username;
 
-        // first add user in his friends database 
-        //then add user's friend in users database
-        // later i have to send users info to his friend 
-        // because user will be added in his friends account
-        let result = await objDbFunctions.saveNewFriend(username,friendName,FriendProfileUrl,true);
-        if(result.friendAdded){
-           res.json({
-               friendAdded:true,
-               status:'online',
-               friendName:friendName,
-               profileUrl:FriendProfileUrl,
-               chatId:result.usersData.chatId
-           });
-           io.to(onlineUsers[friendName]).emit('add-new-friend',result.usersData);
-        }else {
+      if(onlineUsers[friendName]){
+
+           // first add user in his friends database 
+           //then add user's friend in users database
+            // later i have to send users info to his friend 
+          // because user will be added in his friends account
+         let result = await objDbFunctions.saveNewFriend(username,friendName,FriendProfileUrl,true);
+         if(result.friendAdded){
+              res.json({
+                  friendAdded:true,
+                  status:'online',
+                  friendName:friendName,
+                  profileUrl:FriendProfileUrl,
+                  chatId:result.usersData.chatId
+               });
+               io.to(onlineUsers[friendName]).emit('add-new-friend',result.usersData);
+         }else {
            res.json({friendAdded:false});
         }
-   }else {
-      let result = await objDbFunctions.saveNewFriend(username,friendName,FriendProfileUrl,false);
-      if(result.friendAdded){
-         res.json({
-            friendAdded:true,
-            status:friendsTimeStamp,
-            friendName:friendName,
-            profileUrl:FriendProfileUrl,
-            chatId:result.chatId
-         });
       }else {
-         res.json({friendAdded:false});
+         let result = await objDbFunctions.saveNewFriend(username,friendName,FriendProfileUrl,false);
+         if(result.friendAdded){
+            res.json({
+               friendAdded:true,
+               status:friendsTimeStamp,
+               friendName:friendName,
+               profileUrl:FriendProfileUrl,
+               chatId:result.chatId
+            });
+         }else {
+            res.json({friendAdded:false});
+         }
       }
-   }
    // saving friend name in chatCount table for counting unreadchats
 
    await objDbFunctions.createUserForChatCount(username,friendName);
@@ -91,6 +95,7 @@ router.get('/addFriend',async (req,res) => {
       activeFriends[friendName] = {
          [username]:0
       }
+   }
    }
 
 })

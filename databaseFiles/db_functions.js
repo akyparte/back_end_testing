@@ -145,7 +145,7 @@ class Queries {
                   username:username
               }
           });
-
+  
           return result;
     }
 
