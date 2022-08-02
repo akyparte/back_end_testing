@@ -212,18 +212,6 @@ body{
 
 
 /* ------------------------------------------------------------ */
-  #chat-showing-box{
-      /* visibility: hidden; */
-      /* position: relative; */
-  }
-   #no-chat-show {
-    position: absolute;
-    top: 30%;
-    right: 30%;
-    width: 200px;
-    height: 200px;
-   }
-
    #friends {
        /* visibility: hidden; */
    }
@@ -233,6 +221,7 @@ body{
        height: 50px;
        top: 30%;
        left:1%;
+       color: rgb(121, 121, 121);
    }
 
    #friends.chat-list img {

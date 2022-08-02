@@ -11,7 +11,6 @@
     let chatIdObj = {};
     let selectedFriendName;
     let selectedFriendIndex;
-    let no_chat_popup = document.getElementById('no-chat-show');
     let peopleList = document.getElementById('friends');
     let selected_friend_profile_container = document.getElementById('selected-friend-profile-container');
     let selected_friend_profile_img = document.getElementById('selected-friend-profile-img');
@@ -51,38 +50,40 @@
           status = e.target.children[1].children[1].innerText.trim();
           friend_continer = e.target;
       //  console.log(friend_continer);
-      removeAllChildren(message_container);
+      // removeAllChildren(message_container);
        }else if(e.target.nodeName === 'IMG'){
            friendName = e.target.nextElementSibling.children[0].innerText.trim();
            profileUrl = e.target.src;
            status = e.target.nextElementSibling.children[1].innerText.trim();
            friend_continer = e.target.parentNode;
-           removeAllChildren(message_container);
+          //  removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'about'){
            friendName = e.target.children[0].innerText.trim();
            status = e.target.chilldren[1].innerText.trim();
            profileUrl = e.target.previousElementSibling.src;
            friend_continer = e.target.parentNode;
-           removeAllChildren(message_container);
+          //  removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'name'){
            friendName = e.target.innerText.trim();
            profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.nextElementSibling.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
-           removeAllChildren(message_container);
+          //  removeAllChildren(message_container);
        }else if(e.target.nodeName === 'DIV' && e.target.className === 'status'){
          console.log(e.target.previousElementSibling);
            friendName = e.target.previousElementSibling.innerText.trim();
            profileUrl = e.target.parentNode.previousElementSibling.src;
            status = e.target.innerText.trim();
            friend_continer = e.target.parentNode.parentNode;
-           removeAllChildren(message_container);
+          //  removeAllChildren(message_container);
        }
 
       //  console.log(friend_continer);
+      console.log(selected_friend_name.innerText);
+      console.log(friendName);
       if(selected_friend_name.innerText.trim() !== friendName){
 
-
+        removeAllChildren(message_container);
        let friend_list = friend_continer.parentNode;
         for(let i = 0;i < friend_list.children.length;i++){
              if(friend_list.children[i].classList.contains('active')){
@@ -109,7 +110,6 @@
          
        selected_friend_profile_container.style.visibility = 'visible';
        if(message_send_box.style.visibility != 'visible') message_send_box.style.visibility = 'visible';
-       no_chat_popup.style.display = 'none';
        friend_continer.classList.add('active');
       
          loadLoadingPopup();
@@ -346,14 +346,13 @@ function removeAllChildren(parent){
 }
 
 function loadLoadingPopup() {
- if(getComputedStyle(no_chat_popup).display == 'block'){
-   no_chat_popup.style.display = 'none';
- }
  loading_box.style.display = 'flex';
 }
 
 function timeSince(date) {
         console.log('came');
+        console.log(date);
+        console.log(new Date());
   var seconds = Math.floor((new Date() - date) / 1000);
   var interval = seconds / 31536000;
 
@@ -379,12 +378,16 @@ function timeSince(date) {
     return finalTime === 1 ? `${finalTime} hour ago`:`${finalTime} hours ago`;
   }
   interval = seconds / 60;
+  // console.log(seconds);
+  // console.log(interval);
+
+
   if (interval > 1) {
     finalTime = Math.floor(interval);
     return finalTime === 1 ? `${finalTime} minute ago`:`${finalTime} minutes ago`;
   }
-  console.log(seconds);
-  if(seconds < 1) return `1 second ago`;
+  // console.log(seconds);
+  // if(interval < 1) return `1 second ago`;
 
   return seconds === 1 ? `${seconds} second ago`:`${seconds} seconds ago`;
 }
@@ -555,7 +558,8 @@ async function addFriend(e) {
               status = 'online';
               active = 'online';
           }else if(result.status !== 'New User'){
-              status = timeSince(new Date(result.status)); 
+              console.log(result);
+              status = timeSince(new Date(result.status.status)); 
           }else {
              status = result.status;
           }

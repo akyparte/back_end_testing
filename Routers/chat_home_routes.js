@@ -85,6 +85,7 @@ router.get("/get_friends", async (req, res) => {
                   }
               }
          }
+         console.log(friendsData);
        res.json({ hasFriends:true, data: friendsData });
      }else {
        // if user does not any friends

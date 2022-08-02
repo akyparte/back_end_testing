@@ -44,7 +44,7 @@ router.get('/addFriend',async (req,res) => {
       let FriendProfileUrl = friendInfo.profileUrl;
       let friendsTimeStamp = friendInfo.timeStamp;
       let username = jwt.decode(req.cookies.jwt).username;
-
+      console.log(friendInfo);
       if(onlineUsers[friendName]){
 
            // first add user in his friends database 
@@ -60,6 +60,7 @@ router.get('/addFriend',async (req,res) => {
                   profileUrl:FriendProfileUrl,
                   chatId:result.usersData.chatId
                });
+               console.log(result.usersData)
                io.to(onlineUsers[friendName]).emit('add-new-friend',result.usersData);
          }else {
            res.json({friendAdded:false});
