@@ -500,9 +500,9 @@ class Queries {
                 }
             });
             if(result){
-                return result.dataValues.chatCount+chatCount;
+                return {chatCount:result.dataValues.chatCount+chatCount};
             }else {
-                return chatCount;
+                return {chatCount:chatCount};
             }
     }
     

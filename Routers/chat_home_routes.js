@@ -61,7 +61,7 @@ router.get("/get_friends", async (req, res) => {
                   profileUrl: userFriends[i].dataValues.profileUrl,
                   status:'online',
                   chatId:userFriends[i].dataValues.chatId,
-                  unReadChatCount:unreadMessageCount
+                  unReadChatCount:unreadMessageCount.chatCount
                });
               }else {
                   let userTimeStamp = await objDbFunctions.getUsersTimeStamp(userFriends[i].dataValues.friend);
