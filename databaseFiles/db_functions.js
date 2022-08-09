@@ -261,7 +261,7 @@ class Queries {
             return {result:chats,chatsAvailable:true}
         }else {
             let limit;
-            if(unreadChatCount>= 6){
+            if(unreadChatCount > 6){
                  limit = unreadChatCount;
             }else limit = 6;
 

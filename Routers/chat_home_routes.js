@@ -72,7 +72,7 @@ router.get("/get_friends", async (req, res) => {
                        profileUrl: userFriends[i].dataValues.profileUrl,
                        status:'New User',
                        chatId:userFriends[i].dataValues.chatId,
-                       unReadChatCount:unreadMessageCount
+                       unReadChatCount:unreadMessageCount.chatCount
                     });
                   }else {
                    friendsData.push({
