@@ -259,11 +259,25 @@ class Queries {
             })
             chats = chats.map(obj => obj.dataValues);
             return {result:chats,chatsAvailable:true}
-        }else {
-            let limit;
-            if(unreadChatCount > 6){
-                 limit = unreadChatCount;
-            }else limit = 6;
+        }else if(unreadChatCount){
+           if(unreadChatCount <= 6){
+               chats = await Chats.findAll({
+                   where:{chatId:chatId},
+                   offset:chatCount-6
+             }); 
+              chats = chats.map(obj => obj.dataValues);
+              return {result:chats,chatsAvailable:true}
+           }else if(unreadChatCount > 6){
+              let limit = unreadChatCount;
+              chats = await Chats.findAll({
+                  where:{chatId:chatId},
+                  offset:chatCount-limit
+              }); 
+              chats = chats.map(obj => obj.dataValues);
+              return {result:chats,chatsAvailable:true}
+           }
+        }else if(chatCount > 6){
+            let limit = 6;
 
             chats = await Chats.findAll({
                 where:{chatId:chatId},
@@ -493,17 +507,17 @@ class Queries {
         if(unReadChatCount[username] && unReadChatCount[username][friend]){
             chatCount = unReadChatCount[username][friend];
         }
-            let result = await UnreadChatCount.findOne({
-                where:{
-                    username:username,
-                    friend:friend
-                }
-            });
-            if(result){
-                return {chatCount:result.dataValues.chatCount+chatCount};
-            }else {
+            // let result = await UnreadChatCount.findOne({
+            //     where:{
+            //         username:username,
+            //         friend:friend
+            //     }
+            // });
+            // if(result){
+            //     return {chatCount:result.dataValues.chatCount+chatCount};
+            // }else {
                 return {chatCount:chatCount};
-            }
+            // }
     }
     
     async makeUserLoggedIIN(username){

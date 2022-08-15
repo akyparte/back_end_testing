@@ -35,15 +35,6 @@ router.get("/get_friends", async (req, res) => {
      
          for(let i = 0;i < userFriends.length;i++){
               let unreadMessageCount = await objDbFunctions.getUnreadChatCount(userInfo.username,userFriends[i].dataValues.friend);
-              // let currentFriend = userFriends[i].dataValues.friend;
-              // if(unReadChatCount[userInfo.username]){
-              //   if(unReadChatCount[userInfo.username][currentFriend]){
-              //      if(unReadChatCount[userInfo.username][currentFriend] > 0){
-              //         unreadMessageCount = unreadMessageCount + unReadChatCount[userInfo.username][currentFriend];
-              //      }
-              //   }
-              // }
-  
   
           // here initializing activeFriends array with 0 means no friend is selected
           // later when user selects any user ill update with 1
@@ -80,7 +71,7 @@ router.get("/get_friends", async (req, res) => {
                      profileUrl: userFriends[i].dataValues.profileUrl,
                      status:userTimeStamp.result.status,
                      chatId:userFriends[i].dataValues.chatId,
-                     unReadChatCount:unreadMessageCount
+                     unReadChatCount:unreadMessageCount.chatCount
                   });
                   }
               }
@@ -103,16 +94,21 @@ router.post('/get_chats',async(req,res) => {
       let chatId = req.body.chatId;
       var userInfo = jwt.decode(req.cookies.jwt);
       let chatCount = await objDbFunctions.getUnreadChatCount(userInfo.username,req.body.friend);
-      let chats = await objDbFunctions.getChats(chatId,chatCount);
+      let chats;
+      if(chatsArray[chatId] && chatsArray[chatId].length > 0){
+          chats = await objDbFunctions.getChats(chatId,(Math.abs(chatsArray[chatId].length - chatCount.chatCount)));
+      }else {
+          chats = await objDbFunctions.getChats(chatId,chatCount.chatCount);
+      }
       if(chatsArray[chatId] && chatsArray[chatId].length > 0 && chats.chatsAvailable){
           chats.result.push(...chatsArray[chatId]);
-          res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount,requestId:req.body.requestId});
+          res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount.chatCount,requestId:req.body.requestId});
           let result = await objDbFunctions.saveChats(chatId,chatsArray[chatId]);
           chatsArray[chatId] = [];
       }else if(chats.chatsAvailable){
-        res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount,requestId:req.body.requestId})
+        res.json({chats:true,owner:userInfo.username,chatData:chats.result,chatCount:chatCount.chatCount,requestId:req.body.requestId})
       }else if(chatsArray[chatId] && chatsArray[chatId].length > 0){
-        res.json({chats:true,owner:userInfo.username,chatData:chatsArray[chatId],chatCount:chatCount,requestId:req.body.requestId});
+        res.json({chats:true,owner:userInfo.username,chatData:chatsArray[chatId],chatCount:chatCount.chatCount,requestId:req.body.requestId});
         let result = await objDbFunctions.saveChats(chatId,chatsArray[chatId]);
         chatsArray[chatId] = [];
       }else {
@@ -124,7 +120,7 @@ router.post('/get_chats',async(req,res) => {
       if(unReadChatCount[userInfo.username] && unReadChatCount[userInfo.username][req.body.friend]){
         unReadChatCount[userInfo.username][req.body.friend] = 0;
       }
-      await objDbFunctions.resetChatCount(userInfo.username,req.body.friend);
+      // await objDbFunctions.resetChatCount(userInfo.username,req.body.friend);
     }else {
       res.json({ emptyRequest: true });
     }

@@ -211,8 +211,11 @@
     message_container.addEventListener('scroll',async (e) => {
       console.log(chatHistoryRequestId);
       console.log(isChatDataAvailableForCurrentUser);
-      let chatLength = message_container.children.length;
+      console.log(message_container.children);
       if(e.target.scrollTop === 0){
+        let unreadChatMessage = document.getElementById('unread-chat-count');
+        if(unreadChatMessage)message_container.removeChild(unreadChatMessage);
+        let chatLength = message_container.children.length;
           if(chatHistoryRequestId === 'None' && isChatDataAvailableForCurrentUser === true){
               chatHistoryRequestId = 'pending';
               loadLoadingPopup();

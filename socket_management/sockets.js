@@ -43,7 +43,7 @@ class socketHandling {
                         }
                     }
                     await socketHandling.userDisconnectedSaveChats(userToken.username);
-                    await socketHandling.userDisconnectedSaveUnreadChatCount(userToken.username);
+                    // await socketHandling.userDisconnectedSaveUnreadChatCount(userToken.username);
                   }
               });
  
@@ -152,10 +152,10 @@ class socketHandling {
         if(unReadChatCount[friend]){
              if(unReadChatCount[friend][username]){
                 unReadChatCount[friend][username] = unReadChatCount[friend][username] + 1;
-                if(unReadChatCount[friend][username] >= 10){
-                      await objDbFunctions.saveChatCount(friend,username,unReadChatCount[friend][username]);
-                      unReadChatCount[friend][username] = 0;
-                }
+                // if(unReadChatCount[friend][username] >= 10){
+                //       await objDbFunctions.saveChatCount(friend,username,unReadChatCount[friend][username]);
+                //       unReadChatCount[friend][username] = 0;
+                // }
              }else {
                 unReadChatCount[friend][username] = 1;
              }
@@ -181,20 +181,20 @@ class socketHandling {
          }
     }
    
-    static async userDisconnectedSaveUnreadChatCount(username){
-         console.log(unReadChatCount);
-        let friends = await objDbFunctions.getUserFriends(username);
+    // static async userDisconnectedSaveUnreadChatCount(username){
+    //      console.log(unReadChatCount);
+    //     let friends = await objDbFunctions.getUserFriends(username);
 
-        for(let i = 0;i < friends.length;i++){
-            let friend = friends[i].dataValues.friend;
-            if(unReadChatCount[username] && unReadChatCount[username][friend]){
-                await objDbFunctions.saveChatCount(username,friend,unReadChatCount[username][friend]);
-                unReadChatCount[username][friend] = 0;
-           }
+    //     for(let i = 0;i < friends.length;i++){
+    //         let friend = friends[i].dataValues.friend;
+    //         if(unReadChatCount[username] && unReadChatCount[username][friend]){
+    //             await objDbFunctions.saveChatCount(username,friend,unReadChatCount[username][friend]);
+    //             unReadChatCount[username][friend] = 0;
+    //        }
 
-        }
-        console.log('chat count is saved into database');
-    }
+    //     }
+    //     console.log('chat count is saved into database');
+    // }
 
     static getSocketToRoutes(){ return socketHolder; }
 }
