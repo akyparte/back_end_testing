@@ -69,17 +69,18 @@ async function sendEmail(e) {
     });
 
     result = await result.json();
+    console.log(result);
     if (result.response === "OTPSENT") {    
       submit_btn.value = "Submit OTP";
       OTP_field.style.display = 'block';
       submit_btn.removeEventListener('click',sendEmail);
       submit_btn.addEventListener('click',submitOTP);
     } else if (result.response === "OTPNOTSENT") {
-      username.reportValidity();
       username.setCustomValidity("Username is Not Registered");
-    } else if (result.response === "SERVERERROR") {
       username.reportValidity();
+    } else if (result.response === "SERVERERROR") {
       username.setCustomValidity("server error");
+      username.reportValidity();
     }
   }
 }

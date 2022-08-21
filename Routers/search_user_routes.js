@@ -80,8 +80,6 @@ router.get('/addFriend',async (req,res) => {
          }
       }
    // saving friend name in chatCount table for counting unreadchats
-
-   await objDbFunctions.createUserForChatCount(username,friendName);
    if(activeFriends[username]){
       activeFriends[username][friendName] = 0;
    }else {

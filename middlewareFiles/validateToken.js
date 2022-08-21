@@ -16,8 +16,15 @@ class Verification{
         
     }
     isTokenExisted(req,res,next){
-        let token = req.cookies.jwt;
-        if(req.cookies.jwt && jwt.verify(token,config.JWTKEY)){
+        if(req.cookies.jwt && jwt.verify(req.cookies.jwt,config.JWTKEY)){
+            next();
+        }else {
+            res.redirect('/');
+        }
+    }
+
+    verifyLogoutRequest(req,res,next){
+        if(req.cookies.jwt && jwt.verify(req.cookies.jwt,config.JWTKEY)){
             next();
         }else {
             res.redirect('/');

@@ -146,31 +146,6 @@ let Chats = sequelize.define('chats',{
 
 Chats.removeAttribute('id');
 
-let UnreadChatCount = sequelize.define('unReadChatCount',{
-     username:{
-         type:DataTypes.STRING(30),
-         allowNull:false
-     },
-     friend:{
-         type:DataTypes.STRING(30),
-         allowNull:false
-     },
-     chatCount:{
-         type:DataTypes.INTEGER
-     }
-},{
-    indexes:[
-          {
-            unique: true,
-            fields: ['username','friend']
-          }
-    ],
-    timestamps:false
-
-});
-
-UnreadChatCount.removeAttribute('id');
-
 (async function () {
     try{
        await sequelize.sync();
@@ -186,6 +161,5 @@ module.exports.TempEmailStore = TempEmailStore;
 module.exports.Friends = Friends;
 module.exports.UserTimeStamp = UserTimeStamp;
 module.exports.Chats = Chats;
-module.exports.UnreadChatCount = UnreadChatCount;
 module.exports.Sequelize = Sequelize;
 

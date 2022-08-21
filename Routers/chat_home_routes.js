@@ -120,7 +120,6 @@ router.post('/get_chats',async(req,res) => {
       if(unReadChatCount[userInfo.username] && unReadChatCount[userInfo.username][req.body.friend]){
         unReadChatCount[userInfo.username][req.body.friend] = 0;
       }
-      // await objDbFunctions.resetChatCount(userInfo.username,req.body.friend);
     }else {
       res.json({ emptyRequest: true });
     }

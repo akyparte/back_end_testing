@@ -1,6 +1,6 @@
 const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
-const {Users,TempEmailStore,Friends,UserTimeStamp,Chats,UnreadChatCount,Sequelize} = require('./database');
+const {Users,TempEmailStore,Friends,UserTimeStamp,Chats,Sequelize} = require('./database');
 const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
 let unReadChatCount = require('../unReadChats/unreadChatsCount');
@@ -193,54 +193,6 @@ class Queries {
     }
 
 
-    // async getChats(chatId,unreadChatCount){
-    //     let limit;
-    //     if(unreadChatCount>= 6){
-    //         limit = unreadChatCount;
-    //     }else limit = 6;
-
-    //     let chatCount = await Chats.count({
-    //         where:{
-    //             chatId:chatId
-    //         }
-    //     })
-         
-    //     if(chatCount === 0){
-    //         return {
-    //             chatsAvailable:false
-    //         }
-    //     }else {
-    //         let chats;
-    //         if(chatCount <= 6){
-    //             chats = await Chats.findAll({
-    //                 where:{chatId:chatId},
-    //                 offset:chatCount-limit
-    //             })
-    //             // limit = 0
-    //         }else {
-    //             chats = await Chats.findAll({
-    //                 where:{chatId:chatId},
-    //             })
-    //         }
-            
-    //         chats = chats.map(obj => obj.dataValues);
-    //         return {result:chats,chatsAvailable:true}
-    //     }
-
-
-
-
-    //     // if(chats.length){
-    //     //     chats = chats.map(obj => obj.dataValues);
-    //     //     return {result:chats,chatsAvailable:true}
-    //     // }else {
-    //     //     return {
-    //     //         chatsAvailable:false
-    //     //     }
-    //     // }
-    // }
-
-
     async getChats(chatId,unreadChatCount){
          // check if chats are available or not
         let chatCount = await Chats.count({
@@ -362,8 +314,41 @@ class Queries {
             return {userExists:false}
         }
       
-      }
+    }
+
+    async getUserProfile(username){
+        // this function finds user and returns his name and profile
+        // because in front-end when user search for a friend, request comes here
+        let user = await Users.findOne({
+            where:{username:username}
+        })
+        if(user){
+            let userObj = {
+                    username:user.dataValues.username,
+                    profileUrl:user.dataValues.profileUrl,
+                    userExists:true,
+            };
+            return userObj;
+        }else {
+            return {userExists:false}
+        }
       
+    }
+      
+    async updateUserProfile(username,profileSrc){
+        let user = await Users.update(
+            {
+                profileUrl:profileSrc
+            },
+            {
+               where:{
+                 username:username
+               }
+            });
+            return {profileUpdated:true}
+           
+
+    }
     async isAlreadyFriend(username,friendName){
           
           let result = await Friends.findOne({
@@ -441,89 +426,30 @@ class Queries {
          }
     }
 
-    async saveChatCount(username,friend,count){
-            let result = await UnreadChatCount.findOne({
-                where:{
-                    username:username,
-                    friend:friend
-                }
-            });
-
-             let updated = await UnreadChatCount.update({
-                 chatCount:result.dataValues.chatCount + count
-             },{
-                 where:{
-                     username:username,
-                     friend:friend
-                 }
-             });
-
-             if(updated[0]){
-                 return true;
-             }else {
-                 return false;
-             }
-         
-    }
-
-    async createUserForChatCount(username,friend){
-          let created = await UnreadChatCount.bulkCreate([{
-              username:username,
-              friend:friend,
-              chatCount:0
-          },{
-              username:friend,
-              friend:username,
-              chatCount:0  
-          }]);
-          if(created){
-              return true;
-          }else {
-              return false;
-          }
-    }
-
-    async resetChatCount(username,friend){
-          let result = await UnreadChatCount.update({
-              chatCount:0
-          },{
-              where:{
-                  username:username,
-                  friend:friend
-              }
-          });
-
-          if(result) return true;
-          else return false;
-
-    }
-
-
     async getUnreadChatCount(username,friend){
         let chatCount = 0;
-        // if(unReadChatCount[username] && unReadChatCount[username][friend]){
-        //     chatCount = unReadChatCount[username][friend];
-        // }
         if(unReadChatCount[username] && unReadChatCount[username][friend]){
             chatCount = unReadChatCount[username][friend];
         }
-            // let result = await UnreadChatCount.findOne({
-            //     where:{
-            //         username:username,
-            //         friend:friend
-            //     }
-            // });
-            // if(result){
-            //     return {chatCount:result.dataValues.chatCount+chatCount};
-            // }else {
                 return {chatCount:chatCount};
-            // }
     }
     
     async makeUserLoggedIIN(username){
          
         let result = await Users.update({
             ISLOGGEDIN:1
+        },
+        {
+            where:{username:username}
+        });
+        if(result[0]) return true;
+        else return false;
+    }
+
+    async makeUserLoggedOut(username){
+         
+        let result = await Users.update({
+            ISLOGGEDIN:0
         },
         {
             where:{username:username}
@@ -546,11 +472,3 @@ class Queries {
 }
 
 module.exports = Queries;
-
-// let uu = new Queries();
-
-// uu.isRegisteredUser('akshay','dvddv','eeeee');
-
-//  (async function() {
-//     await Users.create({username:'akshay',password:'cscsc',email:'dcjbdcbdb'})
-// })();

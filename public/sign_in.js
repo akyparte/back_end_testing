@@ -28,20 +28,13 @@ login_btn.addEventListener('click',async () => {
 		   // useing location.href property
 		    location.href = '/chat';
 		}else if(result.response === 'unauthenticated'){
-		//    username.value = 'Invalid username';
-		//    password.value = '';
-		//    password.placeholder = 'Invalid password';
 		   username.style.border = '1px solid red';
 		   password.style.border = '1px solid red';
 		   username.setCustomValidity("Invalid credentials");
-		//    password.setCustomValidity("Invalid password");
 		   username.reportValidity();
-		//    password.reportValidity();
 		}else if(result.response === 'alreadyLoggedIn'){
 			username.setCustomValidity("Already Logged In");
-		 //    password.setCustomValidity("Invalid password");
 			username.reportValidity();
-		 //    password.reportValidity();
 		}
 	
 	}else {

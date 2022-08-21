@@ -12,11 +12,6 @@ router.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
     let password = req.body.password;
     
     if(username&&password){
-      //  let loginStatus = await objDbFunctions.isLoggedIn(username);
-      //  if(loginStatus){
-      //     res.json({response:'alreadyLoggedIn'});
-      //     return;
-      //  }
         let result = await objDbFunctions.isRegisteredUser(username,password);
         if(result.alreadyLoggedIn){
            res.json({response:'alreadyLoggedIn'});
@@ -37,27 +32,36 @@ router.post('/signin',objTokenValidation.varifyToken,async (req,res) => {
     }
 });
 
-router.get('/signout',objTokenValidation.varifyToken,(req,res) => {
+router.get('/signout',objTokenValidation.verifyLogoutRequest,async (req,res) => {
     // now delete token cookie from browser 
     // and redirect that person to login page
-    res.clearCookie('jwt');
-    res.redirect('/');
+    if(req.cookies && req.cookies.jwt){
+      var userInfo = jwt.decode(req.cookies.jwt);
+      let result = await objDbFunctions.makeUserLoggedOut(userInfo.username);
+      if(result){
+        res.clearCookie('jwt');
+        res.json({LOGOUT:true})
+      }else {
+        res.json({LOGOUT:false})
+      }
+    }
 })
 
 router.post('/signup',objTokenValidation.varifyToken,async(req,res) => {
-    let username = req.body.username;
-    let password = req.body.password;
-    let email = req.body.email;
-    // now i need a database function which can tell me if this user exists or not
-    // if exists return already_available
-    // otherwise created
-    let result = await objDbFunctions.addUser(username,password,email);
-    if(result.isCreated){
-      res.json({response:'created'});
-    }else {
-      res.send({response:'alreadyAvailable'})
-    }
+    if(req.body && req.body.username && req.body.password && req.body.email){
+        let username = req.body.username;
+        let password = req.body.password;
+        let email = req.body.email;
 
+        let result = await objDbFunctions.addUser(username,password,email);
+        if(result.isCreated){
+          res.json({response:'created'});
+        }else {
+          res.json({response:'alreadyAvailable'})
+        }
+    }else {
+        res.json({isEmptyRequest:true});
+    }
 });
 
 module.exports = router;

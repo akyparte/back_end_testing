@@ -350,9 +350,9 @@ div.visible {
 }
 
 .circle-box {
-    width: 80px;
-    height: 80px;
-    padding: 3px;
+    width: 82px;
+    height: 82px;
+    padding: 1px;
     display: flex;
     align-items: center;
     justify-content: center;

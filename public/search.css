@@ -101,7 +101,7 @@ input.form-control:focus {
     font-size: 1.2rem;
 }
 #user-pic {
-   background-image: url(/default_profile.png); 
+   /* background-image: url(/profile_images/default_profile.png);  */
    width: 80px; height: 80px;
    background-size:cover;
     background-position: center;

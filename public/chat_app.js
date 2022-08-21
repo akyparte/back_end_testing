@@ -11,6 +11,8 @@
     let chatIdObj = {};
     let selectedFriendName;
     let selectedFriendIndex;
+    let isUserProfileFetched = false;
+    let profileUpdationStatus = 'done';
     let peopleList = document.getElementById('friends');
     let selected_friend_profile_container = document.getElementById('selected-friend-profile-container');
     let selected_friend_profile_img = document.getElementById('selected-friend-profile-img');
@@ -29,6 +31,13 @@
     let loading_box = document.getElementById('loading-box');
     let search_user_btn = document.getElementById('search_user_btn');
     let filter_friends_search = document.getElementById('filter-friends-search');
+    let profile_show_btn = document.getElementById('profile-show-btn');
+    let search_user_bar_container = document.getElementById('search-user-container-display');
+    let profile_container_card = document.getElementById('p-container-card');
+    let p_logout_btn = document.getElementById('p-logout-btn');
+    let profile_image_tag = document.getElementById('p-img-tag');
+    let p_edit_btn = document.getElementById('p-edit-btn');
+    let p_name_heading = document.getElementById('p-name-heading');
  
     //calling function to initialize friends
     iitializeFriends();
@@ -186,6 +195,8 @@
 
 
     add_friend_btn.addEventListener('click',() => {
+      search_user_box.style.display = 'flex';
+      console.log('fire');
       popup_frame.classList.add('appear');
       popup.setAttribute('id','move');
       popup.classList.remove('mt-5');
@@ -193,9 +204,66 @@
 
     });
 
+    profile_show_btn.addEventListener('click',async() => {
+      let result;
+      if(!isUserProfileFetched){
+        result = await fetch('/user_profile');
+        result = await result.json();
+        console.log(result);
+        console.log(profile_image_tag.src)
+        if(result.successfull){
+          profile_image_tag.src = `/profile_images/${result.src}`;
+          p_name_heading.innerText = result.username
+          isUserProfileFetched = true;
+        }else {
 
+        }
+      }
+      profile_container_card.style.display = 'flex';
+      popup_frame.classList.add('appear');
+      popup.setAttribute('id','move');
+      popup.classList.remove('mt-5');
+      popup.classList.remove('fadeout');
+
+
+    })
+
+    p_edit_btn.addEventListener('click',async() => {
+      if(profileUpdationStatus != 'updating'){
+        let input = document.createElement('input');
+        let formData = new FormData();
+        input.type = 'file';
+        input.onchange = async () => {
+            console.log(input.files.item(0));
+            // let imageBuffer = await input.files.item(0).arrayBuffer();
+            p_edit_btn.innerText = 'updating';
+            profileUpdationStatus = 'updating';
+            formData.append('userProfile',input.files.item(0),input.files.item(0).type);
+            let result = await fetch('/user_profile/save_profile',{
+              method:'POST',
+              body:formData
+            });
+  
+            result = await result.json();
+            console.log('saved');
+            console.log(result);
+            if(result.successfull){
+              console.log(profile_image_tag.src);
+                   profile_image_tag.src = `/profile_images/${result.profileSrc}`;
+                   console.log(profile_image_tag.src);
+                   isUserProfileFetched = true;
+                   profileUpdationStatus = 'done';
+                   p_edit_btn.innerText = 'edit';
+            }
+                   
+        }
+        input.click();
+      }
+    })
     popup_frame.addEventListener('click',(e) => {
       if(e.target.getAttribute('id') === 'popup-frame' || e.target.classList.contains('container')){
+        profile_container_card.style.display = 'none';
+        search_user_box.style.display = 'none';
         search_input.value = ''
         if(search_user_box.children.length === 3){
           search_user_box.removeChild(search_user_box.children[2]);
@@ -206,6 +274,18 @@
         popup.classList.add('mt-5');
         popup_frame.classList.remove('appear');
       }
+    });
+
+
+    p_logout_btn.addEventListener('click',async () => {
+       let result = await fetch('/signout');
+       result = await result.json()
+       if(result.LOGOUT){
+           
+          location.href = '/';
+       }else {
+
+       }
     });
 
     message_container.addEventListener('scroll',async (e) => {
@@ -320,8 +400,9 @@
     })
 
     socket.on('add-new-friend',(dataObj) => {
+      console.log(dataObj);
         let user = `<li class="clearfix fri-list">
-                         <img src=${dataObj.pro} alt="avatar">
+                         <img src=/profile_images/${dataObj.pro} alt="avatar">
                          <div class="about">
                                <div class="name">${dataObj.user}</div>
                                <div class="status"> <i class="fa fa-circle online"></i> online </div>                                            
@@ -476,7 +557,7 @@ async function iitializeFriends() {
       list =
         list +
         `<li class="clearfix fri-list">
-                          <img src=${friends.data[i].profileUrl} alt="avatar">
+                          <img src=/profile_images/${friends.data[i].profileUrl} alt="avatar">
                           <div class="about">
                              <div class="name">${friends.data[i].friendName}</div>
                              <div class="status"> <i class="fa fa-circle ${active}"></i> ${status} </div>                                            
@@ -523,17 +604,22 @@ search_user_btn.addEventListener('click',async(e) => {
            let friendName = result.friendName;
            let profileUrl = result.profileUrl;
 
+           console.log(result);
+
            let friend_cart = ` <div id = 'user-cart'class="flex-row justify-content-between mb-3">
                                   <div class="d-flex flex-column p-3" id = 'username-cart'>
                                            <p class="mb-1">${friendName} </p>
                                   </div>
                                <div id = 'user-cart-box'class="price" >
-                                    <div id = 'user-pic' styele='background-image:${profileUrl}'> </div>
+                                    <div id = 'user-pic'> </div>
                                </div>
                                </div>`;
 
+                               console.log(friend_cart);
+
           //  search_user_box.innerHTML = search_user_box.innerHTML+friend_cart;  
-           search_user_box.insertAdjacentHTML('beforeend',friend_cart);  
+           search_user_box.insertAdjacentHTML('beforeend',friend_cart); 
+           document.getElementById('user-pic').style.backgroundImage = `url(/profile_images/${profileUrl})`;
            let user_cart = document.getElementById('user-cart');
              user_cart.addEventListener('click',addFriend);
 
@@ -569,7 +655,7 @@ async function addFriend(e) {
             console.log(status);
             console.log(result);
             let friend = `<li class="clearfix">
-                             <img src="${result.profileUrl}" alt="avatar">
+                             <img src="/profile_images/${result.profileUrl}" alt="avatar">
                              <div class="about">
                                  <div class="name">${result.friendName}</div>
                                  <div class="status"> <i class="fa fa-circle ${active}"></i> ${status} </div>                                            
@@ -608,52 +694,57 @@ async function addFriend(e) {
 async function searchFilter(e) {
      let name = e.target.value.trim();
      console.log('called')
-     if(e.key === 'Backspace'){
-       let hiddenUserCount = 0;
-         let noresultbox = document.getElementById('no-results-found');
-           if(noresultbox){
-              let LiToBeRemoved = noresultbox.parentNode;
-              let parent = noresultbox.parentNode.parentNode;
-              parent.removeChild(LiToBeRemoved);
-           }
-         for(let i = 0;i < peopleList.children.length;i++){
-          let friendObj = chatIdObj[i];
-          if(friendObj.friend.includes(name)){
-            if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
-              peopleList.children[i].style.display = 'list-item';
-            }
-          }else {
-              peopleList.children[i].style.display = 'none';
-              hiddenUserCount++;
-          }
-         }
-         if(hiddenUserCount === peopleList.children.length){
-              addNoResultFoundBox();
-         }
-    }else {
-      let hiddenUserCount = 0;
-        let noresultbox = document.getElementById('no-results-found');
-        if(!noresultbox){
-           for(let i = 0;i < peopleList.children.length;i++){
-             let friendObj = chatIdObj[i];
-             console.log(friendObj.friend);
-             if(friendObj.friend.includes(name)){
-               if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
-                 peopleList.children[i].style.display = 'list-item';
-               }
-             }else {
-               console.log(getComputedStyle(peopleList.children[i]).display);
-              //  if(getComputedStyle(peopleList.children[i]).display !== 'none'){
-                 peopleList.children[i].style.display = 'none';
-                 hiddenUserCount++;
-              //  }
+     if(peopleList.children.length){
+        if(e.key === 'Backspace'){
+         let hiddenUserCount = 0;
+           let noresultbox = document.getElementById('no-results-found');
+           console.log(noresultbox);
+             if(noresultbox){
+                let LiToBeRemoved = noresultbox.parentNode;
+                let parent = noresultbox.parentNode.parentNode;
+                console.log(parent);
+                parent.removeChild(LiToBeRemoved);
+                console.log(parent.children);
              }
-         }
-         if(hiddenUserCount === peopleList.children.length){
-            addNoResultFoundBox();
-         }
+           for(let i = 0;i < peopleList.children.length;i++){
+            let friendObj = chatIdObj[i];
+            if(friendObj.friend.includes(name)){
+              if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
+                peopleList.children[i].style.display = 'list-item';
+              }
+            }else {
+                peopleList.children[i].style.display = 'none';
+                hiddenUserCount++;
+            }
+           }
+           if(hiddenUserCount === peopleList.children.length){
+                addNoResultFoundBox();
+           }
+        }else {
+        let hiddenUserCount = 0;
+          let noresultbox = document.getElementById('no-results-found');
+          if(!noresultbox){
+             for(let i = 0;i < peopleList.children.length;i++){
+               let friendObj = chatIdObj[i];
+               console.log(friendObj.friend);
+               if(friendObj.friend.includes(name)){
+                 if(getComputedStyle(peopleList.children[i]).display !== 'list-item'){
+                   peopleList.children[i].style.display = 'list-item';
+                 }
+               }else {
+                 console.log(getComputedStyle(peopleList.children[i]).display);
+                //  if(getComputedStyle(peopleList.children[i]).display !== 'none'){
+                   peopleList.children[i].style.display = 'none';
+                   hiddenUserCount++;
+                //  }
+               }
+           }
+           if(hiddenUserCount === peopleList.children.length){
+              addNoResultFoundBox();
+           }
+          }
         }
-    }
+     }
 }
 
 function addNoResultFoundBox() {
@@ -685,38 +776,5 @@ function makeVisible(parent) {
       parent.children[i].display = 'list-item';
      }
 }
-// function timeSince(date) {
 
-//   var seconds = Math.floor((new Date() - date) / 1000);
-
-//   var interval = seconds / 31536000;
-
-//   let finalTime;
-//   if (interval > 1) {
-//     finalTime = Math.floor(interval);
-//     return finalTime === 1 ? `${finalTime} year ago`:`${finalTime} years ago`;
-//   }
-//   interval = seconds / 2592000;
-//   if (interval > 1) {
-//     finalTime = Math.floor(interval);
-//     return finalTime === 1 ? `${finalTime} month ago`:`${finalTime} months ago`;
-//   }
-//   interval = seconds / 86400;
-//   if (interval > 1) {
-//     finalTime = Math.floor(interval);
-//     return finalTime === 1 ? `${finalTime} day ago`:`${finalTime} days ago`;
-
-//   }
-//   interval = seconds / 3600;
-//   if (interval > 1) {
-//     finalTime = Math.floor(interval);
-//     return finalTime === 1 ? `${finalTime} hour ago`:`${finalTime} hours ago`;
-//   }
-//   interval = seconds / 60;
-//   if (interval > 1) {
-//     finalTime = Math.floor(interval);
-//     return finalTime === 1 ? `${finalTime} minute ago`:`${finalTime} minutes ago`;
-//   }
-//   return interval === 1 ? `${interval} second ago`:`${interval} seconds ago`;
-// }
 })();
