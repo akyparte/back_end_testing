@@ -4,14 +4,9 @@ const objTokenValidation = new clsTokenValidation();
 const jwt = require('jsonwebtoken');
 const cls_db_functions = require('../databaseFiles/db_functions');
 const objDbFunctions = new cls_db_functions();
-const path = require('path');
 const router = express.Router();
 const onlineUsers = require('../DATA_SPACE/online_users');
-let activeFriends = require('../usersActiveFriends/activeFriends');
-const { username } = require('../config');
-let unReadChatCount = require('../unReadChats/unreadChatsCount');
-let chatsArray = require('../chats/chats_array');
-
+const socket_route = require('../socket_management/sockets')
 
 
 router.get('/',async (req,res) => {
@@ -35,6 +30,7 @@ router.post('/save_profile',async (req,res) => {
    if(req.cookies && req.cookies.jwt){
       let userInfo = jwt.decode(req.cookies.jwt);
       let profile = req.files.userProfile[0].filename;
+      console.log(req.files)
       let result = await objDbFunctions.updateUserProfile(userInfo.username,profile);
 
       if(result.profileUpdated){
@@ -42,6 +38,9 @@ router.post('/save_profile',async (req,res) => {
       }else {
          res.json({successfull:false});
       }
+      //now update profile at friends table across this users friends
+      let isUpdated = await objDbFunctions.updateUsersProfileAtFriendsSide(userInfo.username,profile,socket_route.getSocketToRoutes());
+
    }else {
       res.json({ emptyRequest: true });
    }

@@ -107,12 +107,6 @@ class socketHandling {
 
               let usersFriends = await objDbFunctions.getUserFriends(user.username);
 
-              socket.on('new-friend-addded',(friend) => {
-                let cook =  cookie.parse(socket.handshake.headers.cookie);
-                let user = jwt.decode(cook.jwt);
-                
-
-              })
               for(let i = 0;i < usersFriends.length;i++){
                   if(socketUsers[usersFriends[i].dataValues.friend]){
                     io.to(socketUsers[usersFriends[i].dataValues.friend]).emit('friend-connect',user.username);

@@ -238,7 +238,7 @@
             // let imageBuffer = await input.files.item(0).arrayBuffer();
             p_edit_btn.innerText = 'updating';
             profileUpdationStatus = 'updating';
-            formData.append('userProfile',input.files.item(0),input.files.item(0).type);
+            formData.append('userProfile',input.files.item(0),input.files.item(0).name);
             let result = await fetch('/user_profile/save_profile',{
               method:'POST',
               body:formData
@@ -387,16 +387,28 @@
         selected_friend_status.innerText = `Last seen: ${status_time}`;
     })
     
+       // it'll be fired by server whhen that user changes his profile
+       socket.on('update-friends-profile',(friendName,profileUrl) => {
+        let friendObj = Object.values(chatIdObj).find(obj => obj.friendName == friendName);
+        for(let id in chatIdObj){
+           if(chatIdObj[id].friendName == friendName){
+             let friendElement = peopleList.children[id];
+               friendElement.children[0].src = `/profile_images/${profileUrl}`;
+           }
+        }
+
+    })
     socket.on('friend-connect',(fri_name) => {
       console.log(fri_name);
       let element = document.getElementById(fri_name);
-      element = element.previousElementSibling;
-      console.log(element);
-      element.children[1].classList.toggle('offline');
-      element.children[1].classList.toggle('online');
-      let ch = `<i class="fa fa-circle online"></i> online`
-      element.children[1].innerHTML = ch;
-      selected_friend_status.innerText = 'online';
+      if(element){
+        element = element.previousElementSibling;
+        element.children[1].classList.toggle('offline');
+        element.children[1].classList.toggle('online');
+        let ch = `<i class="fa fa-circle online"></i> online`;
+        element.children[1].innerHTML = ch;
+        selected_friend_status.innerText = 'online';
+      }
     })
 
     socket.on('add-new-friend',(dataObj) => {

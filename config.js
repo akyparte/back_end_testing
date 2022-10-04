@@ -8,5 +8,9 @@ module.exports = {
     OTP_message:`here is your opt [OTP] dont share with anyone`,
     em_subject:'OTP from myChat',
     email:'testingemail540@gmail.com',
-    em_password:'gatar@pay@gela'
+    em_password:'maza@ocd@gela',
+    CLIENT_ID:'925948176054-p0criv0g6eusl3d0vaqjja2dugh25r5r.apps.googleusercontent.com',
+    CLIENT_SECRET:'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',
+    REDIRECT_URI:'https://developers.google.com/oauthplayground/',
+    REFRESH_TOKEN:'1//048fFwaISzfT2CgYIARAAGAQSNwF-L9Ir5okKn28x4A3YbQhbO6mmDTYaZBQwcQR2Utp9oGlycbJoXedtSkiQx2xFPsBSBUIvA1I',
 }

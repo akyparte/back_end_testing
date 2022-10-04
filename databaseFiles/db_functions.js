@@ -1,12 +1,13 @@
-const {Op} = require('sequelize');
 const generateID = require('generate-unique-id');
+const {Op} = require('sequelize');
 const {Users,TempEmailStore,Friends,UserTimeStamp,Chats,Sequelize} = require('./database');
 const bcrypt = require('bcrypt');
 const { use } = require('../Routers/login_system_routes');
 let unReadChatCount = require('../unReadChats/unreadChatsCount');
 const timespan = require('jsonwebtoken/lib/timespan');
 let chatsArray = require('../chats/chats_array');
-
+// let socket_route = require('../socket_management/sockets');
+let onlineUsers = require('../DATA_SPACE/online_users');
 class Queries {
   
   async addUser(username,password,email) {
@@ -467,6 +468,34 @@ class Queries {
 
         if(result){
             
+        }
+    }
+
+    async updateUsersProfileAtFriendsSide(username,profileUrl,io){
+        let friends = await this.getUserFriends(username);
+        if(friends.length){
+            // let io = socket_route.getSocketToRoutes();
+            let conditionArr = []
+            for(let i = 0;i < friends.length;i++){
+                 conditionArr.push(friends[i].dataValues.friend);
+                 if(onlineUsers[friends[i].dataValues.friend]){
+                    io.to(onlineUsers[friends[i].dataValues.friend]).emit('update-friends-profile',friends[i].dataValues.friend,profileUrl);
+                 }
+            }
+            let updateQueryObj = {
+                where:{
+                   username:{
+                       [Op.or]:conditionArr
+                   }
+                }
+            };
+           let result = await Friends.update( 
+               { profile:profileUrl },
+                updateQueryObj
+           );
+           if(result[0]) return true;
+           else return false;
+
         }
     }
 }

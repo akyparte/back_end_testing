@@ -38,7 +38,7 @@ var storage = multer.diskStorage({
     if(req.cookies && req.cookies.jwt){
        var userInfo = jwt.decode(req.cookies.jwt);
     }
-    cb(null, userInfo.username + '.'+file.originalname)
+    cb(null, userInfo.username + '.'+file.mimetype.split('/')[1]);
   }
 })
  
@@ -51,7 +51,7 @@ socket_route.getSocket(io);
 app.get('/', objTokenValidation.varifyToken,(req, res) => {
   res.sendFile(__dirname + '/staticPages/sign_up_in_page.html'); 
 });
-app.use('/profile_images',objTokenValidation.isTokenExisted,express.static(__dirname+'/profile_images'))
+app.use('/profile_images',objTokenValidation.isTokenExisted,express.static(__dirname+'/profile_images',{index:false,extensions:['JPEG','JPG','PNG','GIF','TIFF','SVG','RAW']}))
 
 app.use('/',login_system_route);
 
